@@ -5,6 +5,7 @@ from .full import FullAtom
 from .raw import RawAtom
 from .type import TypeAtom
 from .mvhd import MvhdAtom
+from .tkhd import TkhdAtom
 
 
 __all__ = [
@@ -13,4 +14,5 @@ __all__ = [
     "RawAtom",
     "TypeAtom",
     "MvhdAtom",
+    "TkhdAtom",
 ]

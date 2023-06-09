@@ -9,3 +9,4 @@ MP4["styp"] = TypeAtom
 MP4["free"] = RawAtom
 MP4["skip"] = RawAtom
 MP4["mvhd"] = MvhdAtom
+MP4["tkhd"] = TkhdAtom

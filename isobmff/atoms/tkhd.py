@@ -80,60 +80,57 @@ class TkhdAtom(FullAtom):
                         },
                         "modification_time": {
                             "position": slice(4, 8),
-                            "decoder": lambda _, data: self._type_registry["datetime"],
+                            "decoder": self._type_registry["datetime"],
                         },
                         "track_id": {
                             "position": slice(8, 12),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            ),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "reserved_0": {
+                            "position": slice(12, 16),
+                            "decoder": lambda _, data: data,
                         },
                         "duration": {
-                            "position": slice(12, 16),
-                            "decoder": lambda _, data: timedelta(
-                                seconds=int.from_bytes(data, byteorder="big")
-                                / self.timescale
-                            ),
+                            "position": slice(16, 20),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "reserved_1": {
+                            "position": slice(20, 24),
+                            "decoder": lambda _, data: data,
                         },
                         "layer": {
-                            "position": slice(20, 22),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big", signed=True
-                            ),
+                            "position": slice(24, 26),
+                            "decoder": self._type_registry["int"],
                         },
                         "alternate_group": {
-                            "position": slice(22, 24),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            ),
+                            "position": slice(26, 28),
+                            "decoder": self._type_registry["int"],
                         },
                         "volume": {
-                            "position": slice(24, 26),
+                            "position": slice(28, 30),
                             "decoder": lambda _, data: int.from_bytes(
                                 data, byteorder="big"
                             )
                             / 256,
                         },
+                        "reserved_3": {
+                            "position": slice(30, 32),
+                            "decoder": lambda _, data: data,
+                        },
                         "matrix": {
-                            "position": slice(40, 76),
+                            "position": slice(32, 36),
                             "decoder": lambda _, data: [
                                 int.from_bytes(data[i : i + 4], byteorder="big")
                                 for i in range(0, len(data), 4)
                             ],
                         },
-                        "track_width": {
-                            "position": slice(88, 92),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            )
-                            / (1 << 16),
+                        "width": {
+                            "position": slice(36, 40),
+                            "decoder": self._type_registry["int"],
                         },
-                        "track_height": {
-                            "position": slice(92, 96),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            )
-                            / (1 << 16),
+                        "height": {
+                            "position": slice(40, 44),
+                            "decoder": self._type_registry["int"],
                         },
                     }
                 )
@@ -150,27 +147,27 @@ class TkhdAtom(FullAtom):
                         },
                         "track_id": {
                             "position": slice(16, 20),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            ),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "reserved_0": {
+                            "position": slice(16, 20),
+                            "decoder": lambda _, data: data,
                         },
                         "duration": {
                             "position": slice(20, 28),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            ),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "reserved_1": {
+                            "position": slice(28, 32),
+                            "decoder": lambda _, data: data,
                         },
                         "layer": {
                             "position": slice(32, 34),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big", signed=True
-                            ),
+                            "decoder": self._type_registry["int"],
                         },
                         "alternate_group": {
                             "position": slice(34, 36),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            ),
+                            "decoder": self._type_registry["int"],
                         },
                         "volume": {
                             "position": slice(36, 38),
@@ -179,26 +176,24 @@ class TkhdAtom(FullAtom):
                             )
                             / 256,
                         },
+                        "reserved_2": {
+                            "position": slice(38, 40),
+                            "decoder": lambda _, data: data,
+                        },
                         "matrix": {
-                            "position": slice(52, 88),
+                            "position": slice(40, 44),
                             "decoder": lambda _, data: [
                                 int.from_bytes(data[i : i + 4], byteorder="big")
                                 for i in range(0, len(data), 4)
                             ],
                         },
-                        "track_width": {
-                            "position": slice(104, 108),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            )
-                            / (1 << 16),
+                        "width": {
+                            "position": slice(44, 48),
+                            "decoder": self._type_registry["int"],
                         },
-                        "track_height": {
-                            "position": slice(108, 112),
-                            "decoder": lambda _, data: int.from_bytes(
-                                data, byteorder="big"
-                            )
-                            / (1 << 16),
+                        "height": {
+                            "position": slice(48, 52),
+                            "decoder": self._type_registry["int"],
                         },
                     }
                 )
