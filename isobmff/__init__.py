@@ -10,3 +10,17 @@ __all__ = [
     "MP4",
     "DECODERS",
 ]
+
+def crawl(iso: Iterator, indent=0) -> None:
+    """Prints a tree of atoms in an ISO Base Media File.
+
+    Parameters:
+    iso : Iterator
+        The Iterator instance for the ISO Base Media File.
+    """
+    for atom in iso:
+        if issubclass(type(atom), Iterator):
+            print("  " * indent + f"{atom.type}")
+            crawl(atom, indent+1)
+        else:
+            print("  " * indent + f"{atom}")
