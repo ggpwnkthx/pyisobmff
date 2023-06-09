@@ -31,7 +31,10 @@ class Iterator:
     """
 
     def __init__(
-        self, handler: typing.BinaryIO, atom_registry: typing.Type["Registry"], type_registry: typing.Type["Registry"] = DECODERS
+        self,
+        handler: typing.BinaryIO,
+        atom_registry: typing.Type["Registry"],
+        type_registry: typing.Type["Registry"] = DECODERS,
     ) -> None:
         """
         Initialize a new Iterator object.
@@ -62,59 +65,52 @@ class Iterator:
         StopIteration
             If there are no more atoms in the file.
         """
+
         if type(self).__name__ in ["Iterator", "Atom"]:
-            next_start_pos = (
-                self.slice.start + 8 if hasattr(self, "slice") else self._handler.tell()
-            )
+            logging.debug(type(self))
+            if hasattr(self, "slice"):
+                logging.debug(self.type)
+                next_start_pos = self.slice.start + self._header_size
+            else:
+                next_start_pos = 0
 
             while True:
                 if hasattr(self, "slice") and next_start_pos >= self.slice.stop:
                     break  # Reached the end of the slice
-
-                start_pos = next_start_pos
-                logging.debug(f"Atom position: {start_pos}")
-                self._handler.seek(
-                    start_pos
-                )  # Move the file handler to the start position
+                self._handler.seek(next_start_pos)
 
                 atom_size_bytes: bytes = self._handler.read(4)
                 if not atom_size_bytes:
                     break  # Reached the end of the file
 
                 size: int = int.from_bytes(atom_size_bytes, byteorder="big")
-                logging.debug(f"Atom size: {size}")
                 if size == 1:
                     extended_size_bytes: bytes = self._handler.read(8)
                     size = int.from_bytes(extended_size_bytes, byteorder="big")
                 elif size == 0:
                     curr_pos = self._handler.tell()
-                    size = self._handler.seek(0, 2) - start_pos
+                    size = self._handler.seek(0, 2) - next_start_pos
                     self._handler.seek(curr_pos)
 
-                end_pos: int = start_pos + size
-
+                end_pos: int = next_start_pos + size
                 atom_type: str = self._handler.read(4).decode("utf-8")
-                logging.debug(f"Atom type: {atom_type}")
                 atom: "Atom" = self._atom_registry[atom_type](
                     atom_type,
-                    slice(start_pos, end_pos),
+                    slice(next_start_pos, end_pos),
                     self._handler,
                     self._atom_registry,
                     self._type_registry,
                 )
                 if hasattr(self, "_atom_cache"):
                     self._atom_cache.append(atom)
-
                 next_start_pos = end_pos  # Update next_start_pos with the end position
                 yield atom
         else:
             # Object is not an instance of Atom or Iterator, return an empty iterator
             if props := getattr(self, "properties", None):
-                print("props")
                 for prop in props:
                     yield prop, getattr(self, prop)
             else:
-                print("nothing")
                 return iter([])
 
     def __getitem__(

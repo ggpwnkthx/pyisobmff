@@ -123,16 +123,12 @@ class Atom(Iterator):
         TypeError
             If the attribute is not found.
         """
-        if prop := self.properties.get(name, None):
-            if prop is None:
-                prop = {}
-
-            data = self._read_slice(prop.get("position", None))
-
-            if callable(func := prop.get("decoder", None)):
+        if prop := self.properties.get(name, {}):
+            data = self._read_slice(prop.get("position"))
+            if callable(func := prop.get("decoder")):
                 data = func(self, data)
 
             setattr(self, name, data)
             return data
-
-        raise TypeError(f"Attribute '{name}' not found")
+        if name != "data":
+            raise TypeError(f"Attribute '{name}' not found")

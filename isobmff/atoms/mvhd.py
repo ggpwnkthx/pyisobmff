@@ -96,7 +96,7 @@ class MvhdAtom(FullAtom):
                         },
                         "rate": {
                             "position": slice(16, 20),
-                            "decoder": lambda _, data: self._type_registry["int"],
+                            "decoder": self._type_registry["int"],
                         },
                         "volume": {
                             "position": slice(20, 22),
