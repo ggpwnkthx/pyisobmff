@@ -38,7 +38,7 @@ class TkhdAtom(FullAtom):
 
     version : int
         The version of the full atom.
-    flags : byte
+    flags : bytes
         The flags of the full atom.
         
     creation_time : datetime.datetime
