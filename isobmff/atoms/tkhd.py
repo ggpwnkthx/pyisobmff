@@ -1,11 +1,6 @@
 # File: libs/utils/isobmff/atoms/tkhd.py
 
 from . import FullAtom
-from datetime import datetime, timedelta
-import typing
-
-if typing.TYPE_CHECKING:
-    from ..registries import Registry
 
 
 class TkhdAtom(FullAtom):
@@ -63,13 +58,10 @@ class TkhdAtom(FullAtom):
 
     def __init__(
         self,
-        _type: str,
-        _slice: slice,
-        handler: typing.BinaryIO,
-        atom_registry: "Registry" = None,
-        type_registry: "Registry" = None,
+        *args,
+        **kwargs,
     ) -> None:
-        super().__init__(_type, _slice, handler, atom_registry, type_registry)
+        super().__init__(*args, **kwargs)
         match self.version:
             case 0:
                 self.properties.update(

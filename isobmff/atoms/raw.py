@@ -1,9 +1,6 @@
 # File: libs/utils/isobmff/atoms/raw.py
 
 from . import Atom
-import typing
-if typing.TYPE_CHECKING:
-    from ..registries import Registry
 
 
 class RawAtom(Atom):
@@ -53,11 +50,8 @@ class RawAtom(Atom):
 
     def __init__(
         self,
-        _type: str,
-        _slice: slice,
-        handler: typing.BinaryIO,
-        atom_registry: "Registry" = None,
-        type_registry: "Registry" = None,
+        *args,
+        **kwargs,
     ) -> None:
-        super().__init__(_type, _slice, handler, atom_registry, type_registry)
+        super().__init__(*args, **kwargs)
         self.properties.update({"data": None})

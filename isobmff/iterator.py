@@ -65,7 +65,9 @@ class Iterator:
         StopIteration
             If there are no more atoms in the file.
         """
-
+        if props := getattr(self, "properties", None):
+            for prop in props:
+                yield prop, getattr(self, prop)
         if type(self).__name__ in ["Iterator", "Atom"]:
             logging.debug(type(self))
             if hasattr(self, "slice"):
@@ -107,11 +109,7 @@ class Iterator:
                 yield atom
         else:
             # Object is not an instance of Atom or Iterator, return an empty iterator
-            if props := getattr(self, "properties", None):
-                for prop in props:
-                    yield prop, getattr(self, prop)
-            else:
-                return iter([])
+            return iter([])
 
     def __getitem__(
         self, handle: typing.Union[int, slice, str]

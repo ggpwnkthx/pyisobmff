@@ -11,3 +11,4 @@ MP4["skip"] = RawAtom
 MP4["mdat"] = RawAtom
 MP4["mvhd"] = MvhdAtom
 MP4["tkhd"] = TkhdAtom
+MP4["elst"] = ElstAtom

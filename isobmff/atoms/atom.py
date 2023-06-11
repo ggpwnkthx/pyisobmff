@@ -33,7 +33,7 @@ class Atom(Iterator):
     def __init__(
         self,
         _type: str,
-        slice: slice,
+        _slice: slice,
         handler: typing.BinaryIO,
         atom_registry: typing.Type["Registry"] = None,
         type_registry: typing.Type["Registry"] = None,
@@ -54,8 +54,8 @@ class Atom(Iterator):
         """
         super().__init__(handler, atom_registry, type_registry)
         self.type: str = _type
-        self.slice: slice = slice
-        self.size: int = slice.stop - slice.start
+        self.slice: slice = _slice
+        self.size: int = _slice.stop - _slice.start
         self.properties: dict = {
             "type": None,
             "slice": None,
@@ -99,7 +99,7 @@ class Atom(Iterator):
         )
 
         if stop > self.slice.stop:
-            raise ValueError("Slice exceeds the available data range of the atom.")
+            raise ValueError(f"Slice ({start},{stop}) exceeds the available data range of the atom ({self.slice.start},{self.slice.stop}).")
 
         self._handler.seek(start)
         return self._handler.read(stop - start)

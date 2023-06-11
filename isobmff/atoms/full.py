@@ -1,10 +1,6 @@
 # File: libs/utils/isobmff/atoms/full.py
 
 from . import Atom
-import typing
-
-if typing.TYPE_CHECKING:
-    from ..registries import Registry
 
 
 class FullAtom(Atom):
@@ -59,14 +55,11 @@ class FullAtom(Atom):
 
     def __init__(
         self,
-        _type: str,
-        _slice: slice,
-        handler: typing.BinaryIO,
-        atom_registry: "Registry" = None,
-        type_registry: "Registry" = None,
+        *args,
+        **kwargs,
     ) -> None:
-        super().__init__(_type, _slice, handler, atom_registry, type_registry)
+        super().__init__(*args, **kwargs)
         self.version = self._type_registry["int"](None, self._read_slice(slice(0, 1)))
         self.flags = self._type_registry["default"](None, self._read_slice(slice(1, 4)))
         self.properties.update({"version": None, "flags": None})
-        self._header_size = 12
+        self._header_size += 4
