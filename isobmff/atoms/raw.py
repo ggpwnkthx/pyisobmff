@@ -20,16 +20,25 @@ class RawAtom(Atom):
         The file handler of the ISO Base Media File.
     atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: None).
+    type_registry : Registry, optional
+        The type registry used to resolve type classes (default: None).
 
     Attributes:
     -----------
+    type : str
+        The type of the atom.
+    slice : slice
+        The slice representing the start and end positions of the atom in the file.
+    size : int
+        The size of the atom.
     properties : dict
-        A dictionary containing the properties of the raw atom.
+        A dictionary containing additional properties of the atom.
 
     Notes:
     ------
     This class inherits from the Atom class and extends it by adding the properties attribute specific to raw atoms.
-    The properties attribute is left uninitialized and set to None in this class.
+    The "data" property is intentionally left uninitialized and not read from the file handler. 
+    It provides a placeholder for custom data associated with raw atoms.
 
     Example:
     --------
@@ -53,5 +62,21 @@ class RawAtom(Atom):
         *args,
         **kwargs,
     ) -> None:
+        """
+        Initialize a new RawAtom object.
+
+        Parameters:
+        -----------
+        _type : str
+            The type of the atom.
+        _slice : slice
+            The slice representing the start and end positions of the atom in the file.
+        handler : typing.BinaryIO
+            The file handler of the ISO Base Media File.
+        atom_registry : typing.Type["Registry"], optional
+            The atom registry used to resolve atom classes (default: None).
+        type_registry : typing.Type["Registry"], optional
+            The type registry used to resolve type classes (default: None).
+        """
         super().__init__(*args, **kwargs)
         self.properties.update({"data": None})

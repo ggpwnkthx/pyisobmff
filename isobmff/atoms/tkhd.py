@@ -1,4 +1,4 @@
-# File: libs/utils/isobmff/atoms/tkhd.py
+# File: isobmff/atoms/tkhd.py
 
 from . import FullAtom
 
@@ -20,16 +20,58 @@ class TkhdAtom(FullAtom):
         The file handler of the ISO Base Media File.
     atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: None).
+    type_registry : Registry, optional
+        The type registry used to resolve type classes (default: None).
 
     Attributes:
     -----------
+    type : str
+        The type of the atom.
+    slice : slice
+        The slice representing the start and end positions of the atom in the file.
+    size : int
+        The size of the atom.
+    handler : typing.BinaryIO
+        The file handler of the ISO Base Media File.
     properties : dict
-        A dictionary containing the properties of the 'tkhd' atom.
+        A dictionary containing additional properties of the atom.
 
+    version : int
+        The version of the full atom.
+    flags : byte
+        The flags of the full atom.
+        
+    creation_time : datetime.datetime
+        The creation time of the track.
+    modification_time : datetime.datetime
+        The modification time of the track.
+    track_id : int
+        The ID of the track.
+    reserved_0 : bytes
+        Reserved field in the 'tkhd' atom.
+    duration : int
+        The duration of the track.
+    reserved_1 : bytes
+        Reserved field in the 'tkhd' atom.
+    layer : int
+        The layer of the track.
+    alternate_group : int
+        The alternate group of the track.
+    volume : float
+        The volume of the track.
+    reserved_2 : bytes
+        Reserved field in the 'tkhd' atom (version 1).
+    matrix : List[int]
+        The transformation matrix of the track.
+    width : int
+        The width of the track.
+    height : int
+        The height of the track.
+        
     Notes:
     ------
-    This class inherits from the FullAtom class and extends it by adding properties specific to the 'tkhd' atom.
-    The properties attribute is updated based on the version of the 'tkhd' atom (0 or 1).
+    - This class inherits from the FullAtom class and extends it by adding properties specific to the 'tkhd' atom.
+    - The properties attribute is updated based on the version of the 'tkhd' atom (0 or 1).
 
     Example:
     --------

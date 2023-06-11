@@ -7,6 +7,8 @@ from .type import TypeAtom
 from .mvhd import MvhdAtom
 from .tkhd import TkhdAtom
 from .elst import ElstAtom
+from .mdhd import MdhdAtom
+from .hdlr import HdlrAtom
 
 
 __all__ = [
@@ -17,4 +19,6 @@ __all__ = [
     "MvhdAtom",
     "TkhdAtom",
     "ElstAtom",
+    "MdhdAtom",
+    "HdlrAtom",
 ]

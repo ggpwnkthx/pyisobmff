@@ -12,3 +12,5 @@ MP4["mdat"] = RawAtom
 MP4["mvhd"] = MvhdAtom
 MP4["tkhd"] = TkhdAtom
 MP4["elst"] = ElstAtom
+MP4["mdhd"] = MdhdAtom
+MP4["hdlr"] = HdlrAtom

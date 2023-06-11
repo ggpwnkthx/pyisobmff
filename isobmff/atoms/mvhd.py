@@ -1,4 +1,4 @@
-# File: libs/utils/isobmff/atoms/mvhd.py
+# File: isobmff/atoms/mvhd.py
 
 from . import FullAtom
 from datetime import timedelta
@@ -21,17 +21,53 @@ class MvhdAtom(FullAtom):
         The file handler of the ISO Base Media File.
     atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: None).
+    type_registry : Registry, optional
+        The type registry used to resolve type classes (default: None).
 
     Attributes:
     -----------
+    type : str
+        The type of the atom.
+    slice : slice
+        The slice representing the start and end positions of the atom in the file.
+    size : int
+        The size of the atom.
     properties : dict
-        A dictionary containing the properties of the 'mvhd' atom.
+        A dictionary containing additional properties of the atom.
 
+    version : int
+        The version of the full atom.
+    flags : bytes
+        The flags of the full atom.
+
+    creation_time : datetime.datetime
+        The creation time of the movie.
+    modification_time : datetime.datetime
+        The modification time of the movie.
+    timescale : int
+        The time scale of the movie.
+    duration : datetime.timedelta
+        The duration of the movie.
+    rate : int
+        The rate of the movie.
+    volume : float
+        The volume of the movie.
+    reserved_0 : bytes
+        Reserved field in the 'mvhd' atom.
+    reserved_1 : bytes
+        Reserved field in the 'mvhd' atom.
+    matrix : List[int]
+        The transformation matrix of the movie.
+    pre_defined_0 : bytes
+        Pre-defined field in the 'mvhd' atom.
+    next_track_id : int
+        The next available track ID for the movie.
+    
     Notes:
     ------
-    This class inherits from the FullAtom class and extends it by adding properties specific to the 'mvhd' atom.
-    The properties attribute is updated based on the version of the 'mvhd' atom (0 or 1).
-
+    - This class inherits from the FullAtom class and extends it by adding properties specific to the 'mvhd' atom.
+    - The properties attribute is updated based on the version of the 'mvhd' atom (0 or 1).
+    
     Example:
     --------
     ```

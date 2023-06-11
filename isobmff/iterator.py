@@ -1,7 +1,6 @@
-# File: libs/utils/isobmff/iterator.py
+# File: isobmff/iterator.py
 
 from .registries.types import DECODERS
-import logging
 import typing
 
 if typing.TYPE_CHECKING:
@@ -11,7 +10,7 @@ if typing.TYPE_CHECKING:
 
 class Iterator:
     """
-    Class responsible for parsing an ISO Base Media File and iterating over the atoms.
+    An iterator for parsing an ISO Base Media File and iterating over its atoms.
 
     Parameters:
     -----------
@@ -19,6 +18,8 @@ class Iterator:
         The file handler of the ISO Base Media File.
     atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: an empty Registry).
+    type_registry : Registry, optional
+        The type registry used to resolve type classes (default: DECODERS).
 
     Attributes:
     -----------
@@ -28,13 +29,25 @@ class Iterator:
         The atom registry used to resolve atom classes.
     _atom_cache : typing.List[Atom]
         A list to cache the parsed atoms for faster access.
+
+    Notes
+    -----
+    - This iterator provides functionality to parse ISO Base Media Files and iterate over the atoms within the file.
+    - It supports handling nested atoms.
+    - The iterator is designed to work with a file handler that represents the ISO Base Media File.
+    - The atom_registry parameter allows customization of atom class resolution.
+    - The type_registry parameter allows customization of type class resolution.
+    - The iterator caches the parsed atoms internally for faster access when retrieving atoms by index or type.
+    - The iterator supports iteration using the __iter__ method and indexing using the __getitem__ method.
+    - The iterator is compatible with the Atom class and other subclasses of Atom, allowing nested iteration.
+
     """
 
     def __init__(
         self,
         handler: typing.BinaryIO,
-        atom_registry: typing.Type["Registry"],
-        type_registry: typing.Type["Registry"] = DECODERS,
+        atom_registry: "Registry",
+        type_registry: "Registry" = DECODERS,
     ) -> None:
         """
         Initialize a new Iterator object.
@@ -45,11 +58,13 @@ class Iterator:
             The file handler of the ISO Base Media File.
         atom_registry : Registry, optional
             The atom registry used to resolve atom classes (default: an empty Registry).
+        type_registry : Registry, optional
+            The type registry used to resolve type classes (default: DECODERS).
         """
         self._handler: typing.BinaryIO = handler
-        self._atom_registry: typing.Type["Registry"] = atom_registry
-        self._atom_cache: typing.List[typing.Type["Atom"]] = []
-        self._type_registry: typing.Type["Registry"] = type_registry
+        self._atom_registry: "Registry" = atom_registry
+        self._atom_cache: typing.List["Atom"] = []
+        self._type_registry: "Registry" = type_registry
 
     def __iter__(self) -> typing.Iterator["Atom"]:
         """
@@ -64,14 +79,17 @@ class Iterator:
         -------
         StopIteration
             If there are no more atoms in the file.
+
+        Notes:
+        ------
+        - This method enables the iterator functionality, allowing iteration over atoms.
+        - It reads the atom size, type, and other information from the file handler.
         """
         if props := getattr(self, "properties", None):
             for prop in props:
                 yield prop, getattr(self, prop)
         if type(self).__name__ in ["Iterator", "Atom"]:
-            logging.debug(type(self))
             if hasattr(self, "slice"):
-                logging.debug(self.type)
                 next_start_pos = self.slice.start + self._header_size
             else:
                 next_start_pos = 0
@@ -115,7 +133,7 @@ class Iterator:
         self, handle: typing.Union[int, slice, str]
     ) -> typing.Union["Atom", typing.List["Atom"]]:
         """
-        Get the atom(s) from the index based on the provided handle.
+        Get the atom(s) based on the provided handle.
 
         Parameters:
         -----------
@@ -125,7 +143,12 @@ class Iterator:
         Returns:
         --------
         Union[Atom, List[Atom]]
-            The atom(s) from the index based on the handle.
+            The atom(s) based on the handle.
+
+        Notes:
+        ------
+        - This method allows retrieving atom(s) from the atom cache based on the provided handle.
+        - The handle can be an index, slice, or atom type.
         """
         if not len(self._atom_cache):
             list(self)

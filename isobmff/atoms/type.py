@@ -1,4 +1,4 @@
-# File: libs/utils/isobmff/atoms/type.py
+# File: isobmff/atoms/type.py
 
 from .atom import Atom
 
@@ -20,21 +20,37 @@ class TypeAtom(Atom):
         The file handler of the ISO Base Media File.
     atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: None).
+    type_registry : Registry, optional
+        The type registry used to resolve type classes (default: None).
 
     Attributes:
     -----------
+    type : str
+        The type of the atom.
+    slice : slice
+        The slice representing the start and end positions of the atom in the file.
+    size : int
+        The size of the atom.
+    handler : typing.BinaryIO
+        The file handler of the ISO Base Media File.
+    properties : dict
+        A dictionary containing additional properties of the atom.
+
     major_brand : str
         The major brand of the file.
     minor_version : int
         The minor version of the file.
     compatible_brands : List[str]
         A list of compatible brands for the file.
-    properties : dict
-        A dictionary containing the properties of the type atom.
 
     Notes:
     ------
     This class inherits from the Atom class and extends it by adding properties specific to type atoms.
+    
+    The 'major_brand' is read as a utf-8 string from the first 4 bytes of the atom's slice.
+    The 'minor_version' is read as in integer from the next 4 bytes.
+    The 'compatible_brands' is read as a list of utf-8 strings until the end of the atom's slice.
+    
     The properties attribute is updated to include the 'major_brand', 'minor_version', and 'compatible_brands' properties.
 
     Example:
@@ -61,6 +77,22 @@ class TypeAtom(Atom):
         *args,
         **kwargs,
     ) -> None:
+        """
+        Initialize a new TypeAtom object.
+
+        Parameters:
+        -----------
+        _type : str
+            The type of the atom.
+        _slice : slice
+            The slice representing the start and end positions of the atom in the file.
+        handler : typing.BinaryIO
+            The file handler of the ISO Base Media File.
+        atom_registry : typing.Type["Registry"], optional
+            The atom registry used to resolve atom classes (default: None).
+        type_registry : typing.Type["Registry"], optional
+            The type registry used to resolve type classes (default: None).
+        """
         super().__init__(*args, **kwargs)
         self.properties.update(
             {
