@@ -9,6 +9,8 @@ from .tkhd import TkhdAtom
 from .elst import ElstAtom
 from .mdhd import MdhdAtom
 from .hdlr import HdlrAtom
+from .vmhd import VmhdAtom
+from .dref import DrefAtom
 
 
 __all__ = [
@@ -21,4 +23,6 @@ __all__ = [
     "ElstAtom",
     "MdhdAtom",
     "HdlrAtom",
+    "VmhdAtom",
+    "DrefAtom",
 ]
