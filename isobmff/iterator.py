@@ -65,6 +65,49 @@ class Iterator:
         self._atom_registry: "Registry" = atom_registry
         self._atom_cache: typing.List["Atom"] = []
         self._type_registry: "Registry" = type_registry
+        
+    def __iter_props__(self):
+        if props := getattr(self, "properties", None):
+            for prop in props:
+                yield prop, getattr(self, prop)
+
+    def __iter_atoms__(self):
+        if hasattr(self, "slice"):
+            next_start_pos = self.slice.start + self._header_size
+        else:
+            next_start_pos = 0
+        
+        while True:
+            if hasattr(self, "slice") and next_start_pos >= self.slice.stop:
+                break  # Reached the end of the slice
+            self._handler.seek(next_start_pos)
+
+            atom_size_bytes: bytes = self._handler.read(4)
+            if not atom_size_bytes:
+                break  # Reached the end of the file
+
+            size: int = int.from_bytes(atom_size_bytes, byteorder="big")
+            if size == 1:
+                extended_size_bytes: bytes = self._handler.read(8)
+                size = int.from_bytes(extended_size_bytes, byteorder="big")
+            elif size == 0:
+                curr_pos = self._handler.tell()
+                size = self._handler.seek(0, 2) - next_start_pos
+                self._handler.seek(curr_pos)
+
+            end_pos: int = next_start_pos + size
+            atom_type: str = self._handler.read(4).decode("utf-8")
+            atom: "Atom" = self._atom_registry[atom_type](
+                atom_type,
+                slice(next_start_pos, end_pos),
+                self._handler,
+                self._atom_registry,
+                self._type_registry,
+            )
+            if hasattr(self, "_atom_cache"):
+                self._atom_cache.append(atom)
+            next_start_pos = end_pos  # Update next_start_pos with the end position
+            yield atom
 
     def __iter__(self) -> typing.Iterator["Atom"]:
         """
@@ -85,45 +128,10 @@ class Iterator:
         - This method enables the iterator functionality, allowing iteration over atoms.
         - It reads the atom size, type, and other information from the file handler.
         """
-        if props := getattr(self, "properties", None):
-            for prop in props:
-                yield prop, getattr(self, prop)
+        for prop in self.__iter_props__():
+            yield prop
         if type(self).__name__ in ["Iterator", "Atom"]:
-            if hasattr(self, "slice"):
-                next_start_pos = self.slice.start + self._header_size
-            else:
-                next_start_pos = 0
-
-            while True:
-                if hasattr(self, "slice") and next_start_pos >= self.slice.stop:
-                    break  # Reached the end of the slice
-                self._handler.seek(next_start_pos)
-
-                atom_size_bytes: bytes = self._handler.read(4)
-                if not atom_size_bytes:
-                    break  # Reached the end of the file
-
-                size: int = int.from_bytes(atom_size_bytes, byteorder="big")
-                if size == 1:
-                    extended_size_bytes: bytes = self._handler.read(8)
-                    size = int.from_bytes(extended_size_bytes, byteorder="big")
-                elif size == 0:
-                    curr_pos = self._handler.tell()
-                    size = self._handler.seek(0, 2) - next_start_pos
-                    self._handler.seek(curr_pos)
-
-                end_pos: int = next_start_pos + size
-                atom_type: str = self._handler.read(4).decode("utf-8")
-                atom: "Atom" = self._atom_registry[atom_type](
-                    atom_type,
-                    slice(next_start_pos, end_pos),
-                    self._handler,
-                    self._atom_registry,
-                    self._type_registry,
-                )
-                if hasattr(self, "_atom_cache"):
-                    self._atom_cache.append(atom)
-                next_start_pos = end_pos  # Update next_start_pos with the end position
+            for atom in self.__iter_atoms__():
                 yield atom
         else:
             # Object is not an instance of Atom or Iterator, return an empty iterator
