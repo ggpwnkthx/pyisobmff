@@ -1,6 +1,7 @@
-from . import Atom
+from . import FullAtom
 
-class DrefAtom(Atom):
+
+class DrefAtom(FullAtom):
     """
     Class representing the 'dref' atom in an ISO Base Media File.
 
@@ -37,6 +38,7 @@ class DrefAtom(Atom):
         The version of the atom.
     flags : bytes
         The flags of the atom.
+
     entries : List[DataReference]
         The data references.
 
@@ -67,100 +69,63 @@ class DrefAtom(Atom):
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.properties.update(
-            {
-                "version": {
-                    "position": slice(8, 9),
-                    "decoder": self._type_registry["int"],
-                },
-                "flags": {
-                    "position": slice(9, 12),
-                    "decoder": lambda _, data: data,
-                },
-                "entries": {
-                    "position": slice(12, None),
-                    "decoder": self._parse_data_references,
-                },
-            }
+        self.entry_count = self._type_registry["int"](
+            None, self._read_slice(slice(0, 4))
         )
+        self.properties.update({"entry_count": None})
+        self._header_size += 4
 
-    def _parse_data_references(self, _, data):
-        references = []
-        index = 0
+    def __iter_entries__(self):
+        if hasattr(self, "slice"):
+            next_start_pos = self.slice.start + self._header_size
+            print(f"checking for atoms @{next_start_pos}")
+        else:
+            next_start_pos = 0
 
-        while index < len(data):
-            size = self._type_registry["int"](None, data[index:index + 4])
-            ref_type = self._type_registry["string"](None, data[index + 4:index + 8])
-            version = self._type_registry["int"](None, data[index + 8])
-            flags = data[index + 9:index + 12]
-            self_reference = bool(flags[0] & 0x01)
+        while True:
+            if hasattr(self, "slice") and next_start_pos >= self.slice.stop:
+                break  # Reached the end of the slice
+            self._handler.seek(next_start_pos)
 
-            reference = DataReference(size, ref_type, version, flags, self_reference)
-            references.append(reference)
+            atom_size_bytes: bytes = self._handler.read(4)
+            if not atom_size_bytes:
+                break  # Reached the end of the file
 
-            index += size
+            size: int = int.from_bytes(atom_size_bytes, byteorder="big")
+            if size == 1:
+                extended_size_bytes: bytes = self._handler.read(8)
+                size = int.from_bytes(extended_size_bytes, byteorder="big")
+            elif size == 0:
+                curr_pos = self._handler.tell()
+                size = self._handler.seek(0, 2) - next_start_pos
+                self._handler.seek(curr_pos)
 
-        return references
+            end_pos: int = next_start_pos + size
+            atom_type: str = self._handler.read(4).decode("utf-8")
+            atom: "Entity" = Entity(
+                atom_type,
+                slice(next_start_pos, end_pos),
+                self._handler,
+                self._atom_registry,
+                self._type_registry,
+            )
+            if hasattr(self, "_atom_cache"):
+                self._atom_cache.append(atom)
+            next_start_pos = end_pos  # Update next_start_pos with the end position
+            yield atom
+
+    def __iter__(self):
+        for item in super().__iter__():
+            yield item
+        for entry in self.__iter_entries__():
+            yield entry
 
 
-class DataReference:
-    """
-    Class representing a data reference in an ISO Base Media File.
-
-    This class represents a data reference, which is a part of the data reference atom.
-    Each data reference specifies the type and information about the media's data.
-
-    Parameters:
-    -----------
-    size : int
-        The size of the data reference.
-    ref_type : str
-        The type of the data reference.
-    version : int
-        The version of the data reference.
-    flags : bytes
-        The flags of the data reference.
-    self_reference : bool
-        Flag indicating if the media's data is in the same file as the movie atom.
-
-    Attributes:
-    -----------
-    size : int
-        The size of the data reference.
-    ref_type : str
-        The type of the data reference.
-    version : int
-        The version of the data reference.
-    flags : bytes
-        The flags of the data reference.
-    self_reference : bool
-        Flag indicating if the media's data is in the same file as the movie atom.
-
-    Example:
-    --------
-    ```
-    # Create a DataReference instance
-    reference = DataReference(24, 'url ', 0, b'\x00\x00\x00', False)
-
-    # Access the properties of the DataReference
-    print(reference.size)            # Output: 24
-    print(reference.ref_type)        # Output: 'url '
-    print(reference.version)         # Output: 0
-    print(reference.flags)           # Output: b'\x00\x00\x00'
-    print(reference.self_reference)  # Output: False
-    ```
-    """
-
+class Entity(FullAtom):
     def __init__(
         self,
-        size: int,
-        ref_type: str,
-        version: int,
-        flags: bytes,
-        self_reference: bool,
+        *args,
+        **kwargs,
     ) -> None:
-        self.size = size
-        self.ref_type = ref_type
-        self.version = version
-        self.flags = flags
-        self.self_reference = self_reference
+        super().__init__(*args, **kwargs)
+        self.properties.update({"data": {"position": slice(0, None)}})
