@@ -1,6 +1,7 @@
 # File: isobmff/atoms/elst.py
 
-from . import FullAtom
+from . import FullAtom, Atom
+import struct
 
 
 class ElstAtom(FullAtom):
@@ -35,7 +36,7 @@ class ElstAtom(FullAtom):
         The file handler of the ISO Base Media File.
     properties : dict
         A dictionary containing additional properties of the atom.
-        
+
     entry_count : int
         The number of edit list entries in the 'elst' atom.
 
@@ -75,15 +76,70 @@ class ElstAtom(FullAtom):
         self._header_size += 4
 
     def __iter__(self):
-        super().__iter__()
-        match self.version:
-            case 0:
-                size = 12
-            case 1:
-                size = 20
-        
+        for item in super().__iter__():
+            yield item
         for i in range(self.entry_count):
-            start = i * size
-            stop = start + size
-            yield self._read_slice(slice(start,stop))
+            match self.version:
+                case 0:
+                    size = 12
+                case 1:
+                    size = i * 20
+            yield Entity(
+                None,
+                slice(
+                    start := (i * size) + self.slice.start + self._header_size,
+                    start + size,
+                ),
+                self._handler,
+                self._atom_registry,
+                self._type_registry,
+                version=self.version,
+            )
 
+
+class Entity(Atom):
+    def __init__(
+        self,
+        *args,
+        version: int = 0,
+        **kwargs,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._header_size = 0
+        match version:
+            case 0:
+                self.properties.update(
+                    {
+                        "segment_duration": {
+                            "position": slice(0, 4),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "media_time": {
+                            "position": slice(4, 8),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "media_rate": {
+                            "position": slice(8, 12),
+                            "decoder": lambda _, data: struct.unpack("<l", data)[0]
+                            / 256,
+                        },
+                    }
+                )
+            case 1:
+                self.properties.update(
+                    {
+                        "segment_duration": {
+                            "position": slice(0, 8),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "media_time": {
+                            "position": slice(8, 16),
+                            "decoder": self._type_registry["int"],
+                        },
+                        "media_rate_integer": {
+                            "position": slice(16, 20),
+                            "decoder": lambda _, data: struct.unpack("<l", data)[0]
+                            / 256,
+                        },
+                    }
+                )
