@@ -1,6 +1,7 @@
 # File: isobmff/iterator.py
 
 from .registries.types import DECODERS
+import logging
 import typing
 
 if typing.TYPE_CHECKING:
@@ -62,10 +63,14 @@ class Iterator:
             The type registry used to resolve type classes (default: DECODERS).
         """
         self._handler: typing.BinaryIO = handler
+        if not self._handler.seekable():
+            logging.warning(
+                "The file handler is not seekable. The entire file will have to be read in order to parse it. This is likely undesireable. Continue with caution."
+            )
         self._atom_registry: "Registry" = atom_registry
         self._atom_cache: typing.List["Atom"] = []
         self._type_registry: "Registry" = type_registry
-        
+
     def __iter_props__(self):
         if props := getattr(self, "properties", None):
             for prop in props:
@@ -76,7 +81,7 @@ class Iterator:
             next_start_pos = self.slice.start + self._header_size
         else:
             next_start_pos = 0
-        
+
         while True:
             if hasattr(self, "slice") and next_start_pos >= self.slice.stop:
                 break  # Reached the end of the slice
@@ -96,7 +101,7 @@ class Iterator:
                 self._handler.seek(curr_pos)
 
             end_pos: int = next_start_pos + size
-            atom_type: str = self._handler.read(4).decode("utf-8")
+            atom_type: str = self._handler.read(4).decode("utf-8").strip()
             atom: "Atom" = self._atom_registry[atom_type](
                 atom_type,
                 slice(next_start_pos, end_pos),
