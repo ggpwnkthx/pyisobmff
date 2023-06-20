@@ -13,6 +13,7 @@ from .vmhd import VmhdAtom
 from .dref import DrefAtom
 from .stsd import StsdAtom
 from .stts import SttsAtom
+from .stss import StssAtom
 
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     "DrefAtom",
     "StsdAtom",
     "SttsAtom",
+    "StssAtom",
 ]
