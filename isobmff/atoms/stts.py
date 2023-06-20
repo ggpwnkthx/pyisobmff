@@ -1,14 +1,14 @@
-# File: isobmff/atoms/dref.py
+# File: isobmff/atoms/stts.py
 
 from . import FullAtom
 
 
-class DrefAtom(FullAtom):
+class SttsAtom(FullAtom):
     """
-    Class representing the 'dref' atom in an ISO Base Media File.
+    Class representing the 'stts' atom in an ISO Base Media File.
 
-    This class extends the Atom class and represents the data reference atom.
-    The data reference atom contains tabular data that instructs the data handler component how to access the media's data.
+    This class is a subclass of the FullAtom class and provides additional functionality for the 'stts' atom.
+    The 'stts' atom contains a table that defines the duration of each sample in the media.
 
     Parameters:
     -----------
@@ -41,27 +41,34 @@ class DrefAtom(FullAtom):
     flags : bytes
         The flags of the atom.
 
-    entries : List[DataReference]
-        The data references.
+    entry_count : int
+        The number of entries in the time-to-sample table
+    entries : List[Dict[str, int]]
+        A list of dictionaries representing each entry in the time-to-sample table.
+        Each dictionary contains 'sample_count' and 'sample_duration' fields.
 
     Notes:
     ------
-    - This class extends the Atom class and represents the 'dref' atom.
+    - This class inherits from the FullAtom class and extends it by adding properties specific to the 'stts' atom.
 
     Example:
     --------
     ```
-    # Create a Registry and register the DataReferenceAtom class
+    # Create a Registry and register the SttsAtom class
     reg = Registry()
-    reg["dref"] = DataReferenceAtom
+    reg["stts"] = SttsAtom
 
     # Create an Iterator instance for an ISO Base Media File
     iso = Iterator(open("path/to/file.mp4", "rb"), reg)
 
-    # Access the properties of the DataReferenceAtom
+    # Access the properties of the SttsAtom
     atom = iso[-1][0]
-    print(atom.version)    # Output: 0 (example value)
-    print(atom.entries)    # Output: [DataReference, DataReference, ...] (example values)
+    print(atom.version)                  # Output: 0 (example value)
+    print(atom.entry_count)              # Output: 2 (example value)
+
+    # Iterate over the time-to-sample table
+    for entry in atom.entries:
+        print(entry)
     ```
     """
 
@@ -75,33 +82,15 @@ class DrefAtom(FullAtom):
         self.entry_count = self._type_registry["int"](
             None, self._read_slice(slice(0, 4))
         )
-        self.entries = []
         self._header_size += 4
-        self._atom_registry["alis"] = Entity
-        self._atom_registry["rsrc"] = Entity
-        self._atom_registry["url"] = Entity
-        self._atom_registry["urn"] = Entity
+        self.entries = []
         next_start_pos = self.slice.start + self._header_size
         for i in range(self.entry_count):
             self._handler.seek(next_start_pos)
-            atom_size: int = int.from_bytes(self._handler.read(4), byteorder="big")
-            atom_type: str = self._handler.read(4).decode("utf-8").strip()
-            end_pos: int = next_start_pos + atom_size
-            atom = Entity(
-                atom_type,
-                slice(next_start_pos, end_pos),
-                self._handler,
-                self._atom_registry,
-                self._type_registry,
+            self.entries.append(
+                {
+                    "count": int.from_bytes(self._handler.read(4), byteorder="big"),
+                    "duration": int.from_bytes(self._handler.read(4), byteorder="big"),
+                }
             )
-            self.entries.append(atom)
-            next_start_pos = end_pos  # Update next_start_pos with the end position
-
-class Entity(FullAtom):
-    def __init__(
-        self,
-        *args,
-        **kwargs,
-    ) -> None:
-        super().__init__(*args, **kwargs)
-        self.properties.update({"data": {"position": slice(0, None)}})
+            next_start_pos += 8  # Move to the next entry in the table

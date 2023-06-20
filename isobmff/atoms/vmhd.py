@@ -1,3 +1,5 @@
+# File: isobmff/atoms/vmhd.py
+
 from . import FullAtom
 
 class VmhdAtom(FullAtom):

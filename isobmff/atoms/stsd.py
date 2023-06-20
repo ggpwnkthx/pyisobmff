@@ -1,14 +1,14 @@
-# File: isobmff/atoms/dref.py
+# File: isobmff/atoms/stsd.py
 
-from . import FullAtom
+from . import FullAtom, Atom
 
 
-class DrefAtom(FullAtom):
+class StsdAtom(FullAtom):
     """
-    Class representing the 'dref' atom in an ISO Base Media File.
+    Class representing the 'stsd' atom in an ISO Base Media File.
 
-    This class extends the Atom class and represents the data reference atom.
-    The data reference atom contains tabular data that instructs the data handler component how to access the media's data.
+    This class is a subclass of the FullAtom class and provides additional functionality for the 'stsd' atom.
+    The 'stsd' atom stores information that allows decoding samples in the media.
 
     Parameters:
     -----------
@@ -37,31 +37,37 @@ class DrefAtom(FullAtom):
         A dictionary containing additional properties of the atom.
 
     version : int
-        The version of the atom.
+        The version of the full atom.
     flags : bytes
-        The flags of the atom.
+        The flags of the full atom.
 
-    entries : List[DataReference]
-        The data references.
+    entry_count : int
+        The number of sample descriptions.
+
+    sample_descriptions : List[Dict[str, Any]]
+        A list of sample descriptions, where each description is represented by a dictionary.
 
     Notes:
     ------
-    - This class extends the Atom class and represents the 'dref' atom.
+    - This class inherits from the FullAtom class and extends it by adding properties specific to the 'stsd' atom.
 
     Example:
     --------
     ```
-    # Create a Registry and register the DataReferenceAtom class
+    # Create a Registry and register the StsdAtom class
     reg = Registry()
-    reg["dref"] = DataReferenceAtom
+    reg["stsd"] = StsdAtom
 
     # Create an Iterator instance for an ISO Base Media File
     iso = Iterator(open("path/to/file.mp4", "rb"), reg)
 
-    # Access the properties of the DataReferenceAtom
+    # Access the properties of the StsdAtom
     atom = iso[-1][0]
-    print(atom.version)    # Output: 0 (example value)
-    print(atom.entries)    # Output: [DataReference, DataReference, ...] (example values)
+    print(atom.entry_count)         # Output: 2 (example value)
+
+    # Iterate over the sample descriptions
+    for description in atom.sample_descriptions:
+        print(description)
     ```
     """
 
@@ -75,12 +81,8 @@ class DrefAtom(FullAtom):
         self.entry_count = self._type_registry["int"](
             None, self._read_slice(slice(0, 4))
         )
-        self.entries = []
         self._header_size += 4
-        self._atom_registry["alis"] = Entity
-        self._atom_registry["rsrc"] = Entity
-        self._atom_registry["url"] = Entity
-        self._atom_registry["urn"] = Entity
+        self.entries = []
         next_start_pos = self.slice.start + self._header_size
         for i in range(self.entry_count):
             self._handler.seek(next_start_pos)
@@ -97,11 +99,25 @@ class DrefAtom(FullAtom):
             self.entries.append(atom)
             next_start_pos = end_pos  # Update next_start_pos with the end position
 
-class Entity(FullAtom):
+
+class Entity(Atom):
     def __init__(
         self,
         *args,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.properties.update({"data": {"position": slice(0, None)}})
+        self.properties.update(
+            {
+                "reserved_0": {
+                    "position": slice(0, 6),
+                },
+                "index": {
+                    "position": slice(6, 8),
+                    "decoder": self._type_registry["int"],
+                },
+                "data": {
+                    "position": slice(8, None),
+                }
+            }
+        )
