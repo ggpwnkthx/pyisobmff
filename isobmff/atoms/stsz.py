@@ -109,7 +109,7 @@ class Entry(Atom):
         self._header_size = 0
         self.properties.update(
             {
-                "first_chunk": {
+                "sample_size": {
                     "position": slice(0, 4),
                     "decoder": self._type_registry["int"],
                 },
