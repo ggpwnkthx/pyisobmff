@@ -95,6 +95,8 @@ class SttsAtom(FullAtom):
 
 
 class Entry(Atom):
+    size = 8
+
     def __init__(
         self,
         *args,
