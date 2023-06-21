@@ -17,6 +17,7 @@ from .stts import SttsAtom
 from .stss import StssAtom
 from .ctts import CttsAtom
 from .stsc import StscAtom
+from .stsz import StszAtom
 
 __all__ = [
     "Atom",
@@ -36,4 +37,5 @@ __all__ = [
     "StssAtom",
     "CttsAtom",
     "StscAtom",
+    "StszAtom",
 ]

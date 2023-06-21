@@ -21,3 +21,4 @@ MP4["stts"] = SttsAtom
 MP4["stss"] = StssAtom
 MP4["ctts"] = CttsAtom
 MP4["stsc"] = StscAtom
+MP4["stsz"] = StszAtom
