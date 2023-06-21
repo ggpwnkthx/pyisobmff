@@ -1,6 +1,6 @@
 # File: isobmff/atoms/stsd.py
 
-from . import FullAtom, Atom
+from . import FullAtom, Atom, Table
 
 
 class StsdAtom(FullAtom):
@@ -82,25 +82,20 @@ class StsdAtom(FullAtom):
             None, self._read_slice(slice(0, 4))
         )
         self._header_size += 4
-        self.entries = []
-        next_start_pos = self.slice.start + self._header_size
-        for i in range(self.entry_count):
-            self._handler.seek(next_start_pos)
-            atom_size: int = int.from_bytes(self._handler.read(4), byteorder="big")
-            atom_type: str = self._handler.read(4).decode("utf-8").strip()
-            end_pos: int = next_start_pos + atom_size
-            atom = Entity(
-                atom_type,
-                slice(next_start_pos, end_pos),
-                self._handler,
-                self._atom_registry,
-                self._type_registry,
-            )
-            self.entries.append(atom)
-            next_start_pos = end_pos  # Update next_start_pos with the end position
+        self.entries = Table(
+            None,
+            slice(self.slice.start + self._header_size, self.slice.stop),
+            self._handler,
+            self._atom_registry,
+            self._type_registry,
+            self,
+            entry_type=Entry,
+        )
 
 
-class Entity(Atom):
+class Entry(Atom):
+    size = 12
+
     def __init__(
         self,
         *args,
@@ -118,6 +113,9 @@ class Entity(Atom):
                 },
                 "data": {
                     "position": slice(8, None),
-                }
+                },
             }
         )
+
+
+

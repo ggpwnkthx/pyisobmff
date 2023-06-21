@@ -1,6 +1,6 @@
 # File: isobmff/atoms/stts.py
 
-from . import FullAtom
+from . import FullAtom, Atom, Table
 
 
 class SttsAtom(FullAtom):
@@ -83,14 +83,34 @@ class SttsAtom(FullAtom):
             None, self._read_slice(slice(0, 4))
         )
         self._header_size += 4
-        self.entries = []
-        next_start_pos = self.slice.start + self._header_size
-        for i in range(self.entry_count):
-            self._handler.seek(next_start_pos)
-            self.entries.append(
-                {
-                    "count": int.from_bytes(self._handler.read(4), byteorder="big"),
-                    "duration": int.from_bytes(self._handler.read(4), byteorder="big"),
-                }
-            )
-            next_start_pos += 8  # Move to the next entry in the table
+        self.entries = Table(
+            None,
+            slice(self.slice.start + self._header_size, self.slice.stop),
+            self._handler,
+            self._atom_registry,
+            self._type_registry,
+            self,
+            entry_type=Entry,
+        )
+
+
+class Entry(Atom):
+    def __init__(
+        self,
+        *args,
+        **kwargs,
+    ) -> None:
+        super().__init__(*args, **kwargs)
+        self._header_size = 0
+        self.properties.update(
+            {
+                "count": {
+                    "position": slice(0, 4),
+                    "decoder": self._type_registry["int"],
+                },
+                "duration": {
+                    "position": slice(4, None),
+                    "decoder": self._type_registry["int"],
+                },
+            }
+        )
