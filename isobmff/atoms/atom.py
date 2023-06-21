@@ -38,8 +38,6 @@ class Atom(Iterator):
         The file handler of the ISO Base Media File.
     properties : dict
         A dictionary containing additional properties of the atom.
-    parent : Atom
-        The parent atom of this atom.
 
     Notes:
     ------

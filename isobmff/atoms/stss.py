@@ -76,6 +76,7 @@ class Entry(Atom):
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
+        self._header_size = 0
         self.properties.update(
             {
                 "reserved_0": {
@@ -90,24 +91,3 @@ class Entry(Atom):
                 },
             }
         )
-class Entries(Atom):
-    def __init__(self, *args, entity_size: int, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._header_size = 0
-        self._entity_size = entity_size
-
-    def __getitem__(self, index: int):
-        if index < 0:
-            index = self._parent.entry_count + index
-        if index > (self._parent.entry_count - 1):
-            raise IndexError()
-        if index not in self._atom_cache.keys():
-            self._handler.seek(
-                self.size.start + self._header_size + (index * self._entity_size)
-            )
-            self._atom_cache[index] = int.from_bytes(self._handler.read(4), byteorder="big")
-        return self._atom_cache[index]
-
-    def __iter__(self):
-        for index in range(self._parent.entry_count):
-            yield self[index]

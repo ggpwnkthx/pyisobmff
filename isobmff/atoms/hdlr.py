@@ -82,27 +82,26 @@ class HdlrAtom(FullAtom):
         super().__init__(*args, **kwargs)
         self.properties.update(
             {
-                "component_type": {
+                "pre_defined_0": {
                     "position": slice(0, 4),
-                    "decoder": self._type_registry["string"],
                 },
-                "component_subtype": {
+                "handler_type": {
                     "position": slice(4, 8),
                     "decoder": self._type_registry["string"],
                 },
-                "component_manufacturer": {
+                "reserved_0": {
                     "position": slice(8, 12),
                     "decoder": self._type_registry["string"],
                 },
-                "component_flags": {
+                "reserved_1": {
                     "position": slice(12, 16),
                     "decoder": lambda _, data: data,
                 },
-                "component_flags_mask": {
+                "reserved_2": {
                     "position": slice(16, 20),
                     "decoder": lambda _, data: data,
                 },
-                "component_name": {
+                "name": {
                     "position": slice(20, None),
                     "decoder": self._type_registry["string"],
                 },

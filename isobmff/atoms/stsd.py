@@ -94,25 +94,25 @@ class StsdAtom(FullAtom):
 
 
 class Entry(Atom):
-    size = 12
-
     def __init__(
         self,
         *args,
         **kwargs,
     ) -> None:
         super().__init__(*args, **kwargs)
+        self._header_size = 0
         self.properties.update(
             {
-                "reserved_0": {
-                    "position": slice(0, 6),
+                "format": {
+                    "position": slice(0, 4),
+                    "decoder": self._type_registry["string"],
                 },
                 "index": {
-                    "position": slice(6, 8),
+                    "position": slice(4, 6),
                     "decoder": self._type_registry["int"],
                 },
                 "data": {
-                    "position": slice(8, None),
+                    "position": slice(6, None),
                 },
             }
         )

@@ -114,7 +114,7 @@ class Table(Atom):
                     )
                 self._handler.seek(start)
                 size = int.from_bytes(self._handler.read(4), byteorder="big")
-                self._entry_slices.append(slice(start, start + size))
+                self._entry_slices.append(slice(start + 4, start + size))
 
     def __getitem__(self, index: int):
         if index < 0:

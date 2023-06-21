@@ -25,3 +25,4 @@ MP4["stsz"] = StszAtom
 MP4["stco"] = StcoAtom
 MP4["sgpd"] = SgpdAtom
 MP4["sbgp"] = SbgpAtom
+MP4["meta"] = FullAtom

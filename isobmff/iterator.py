@@ -174,6 +174,6 @@ class Iterator:
             start, stop, step = handle.indices(len(self._atom_cache))
             return [self._atom_cache[i] for i in range(start, stop, step)]
         elif isinstance(handle, str):
-            return [atom for atom in self._atom_cache if atom.type == handle]
+            return [atom for _, atom in self._atom_cache.items() if atom.type == handle]
         else:
             raise ValueError("Invalid handle type.")
