@@ -18,6 +18,7 @@ from .stss import StssAtom
 from .ctts import CttsAtom
 from .stsc import StscAtom
 from .stsz import StszAtom
+from .stco import StcoAtom
 
 __all__ = [
     "Atom",
@@ -38,4 +39,5 @@ __all__ = [
     "CttsAtom",
     "StscAtom",
     "StszAtom",
+    "StcoAtom",
 ]
