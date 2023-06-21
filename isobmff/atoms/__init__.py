@@ -15,7 +15,8 @@ from .dref import DrefAtom
 from .stsd import StsdAtom
 from .stts import SttsAtom
 from .stss import StssAtom
-
+from .ctts import CttsAtom
+from .stsc import StscAtom
 
 __all__ = [
     "Atom",
@@ -33,4 +34,6 @@ __all__ = [
     "StsdAtom",
     "SttsAtom",
     "StssAtom",
+    "CttsAtom",
+    "StscAtom",
 ]

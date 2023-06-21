@@ -19,3 +19,5 @@ MP4["dref"] = DrefAtom
 MP4["stsd"] = StsdAtom
 MP4["stts"] = SttsAtom
 MP4["stss"] = StssAtom
+MP4["ctts"] = CttsAtom
+MP4["stsc"] = StscAtom
