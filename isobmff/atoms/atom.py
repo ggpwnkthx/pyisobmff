@@ -55,6 +55,7 @@ class Atom(Iterator):
         handler: typing.BinaryIO,
         atom_registry: typing.Type["Registry"] = None,
         type_registry: typing.Type["Registry"] = None,
+        parent: typing.Type["Atom"] = None
     ) -> None:
         """
         Initialize a new Atom object.
@@ -82,6 +83,7 @@ class Atom(Iterator):
             "size": None,
         }
         self._header_size = 8
+        self._parent = parent
 
     def __repr__(self) -> str:
         """
