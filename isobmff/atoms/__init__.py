@@ -1,8 +1,9 @@
 # File: libs/utils/isobmff/atoms/__init__.py
 
 from .atom import Atom
-from .full import FullAtom
+from .table import Table
 from .raw import RawAtom
+from .full import FullAtom
 from .type import TypeAtom
 from .mvhd import MvhdAtom
 from .tkhd import TkhdAtom
@@ -18,8 +19,9 @@ from .stss import StssAtom
 
 __all__ = [
     "Atom",
-    "FullAtom",
+    "Table",
     "RawAtom",
+    "FullAtom",
     "TypeAtom",
     "MvhdAtom",
     "TkhdAtom",
