@@ -1,6 +1,7 @@
 # File: isobmff/iterator.py
 
 from .registries.types import DECODERS
+from collections import OrderedDict
 import logging
 import typing
 
@@ -28,7 +29,7 @@ class Iterator:
         The file handler of the ISO Base Media File.
     _atom_registry : Registry
         The atom registry used to resolve atom classes.
-    _atom_cache : typing.List[Atom]
+    _atom_cache : typing.Dict[int, Atom]
         A list to cache the parsed atoms for faster access.
 
     Notes
@@ -68,7 +69,7 @@ class Iterator:
                 "The file handler is not seekable. The entire file will have to be read in order to parse it. This is likely undesireable. Continue with caution."
             )
         self._atom_registry: "Registry" = atom_registry
-        self._atom_cache: typing.List["Atom"] = []
+        self._atom_cache: typing.Dict[int, "Atom"] = OrderedDict()
         self._type_registry: "Registry" = type_registry
 
     def __iter_props__(self):
@@ -108,9 +109,11 @@ class Iterator:
                 self._handler,
                 self._atom_registry,
                 self._type_registry,
+                self if issubclass(type(self), Iterator) else None
             )
             if hasattr(self, "_atom_cache"):
-                self._atom_cache.append(atom)
+                max_key = max(self._atom_cache.keys()) if self._atom_cache else -1
+                self._atom_cache[max_key + 1] = atom
             next_start_pos = end_pos  # Update next_start_pos with the end position
             yield atom
 
@@ -165,8 +168,11 @@ class Iterator:
         """
         if not len(self._atom_cache):
             list(self)
-        if isinstance(handle, int) or isinstance(handle, slice):
+        if isinstance(handle, int):
             return self._atom_cache[handle]
+        elif isinstance(handle, slice):
+            start, stop, step = handle.indices(len(self._atom_cache))
+            return [self._atom_cache[i] for i in range(start, stop, step)]
         elif isinstance(handle, str):
             return [atom for atom in self._atom_cache if atom.type == handle]
         else:
