@@ -19,6 +19,8 @@ from .ctts import CttsAtom
 from .stsc import StscAtom
 from .stsz import StszAtom
 from .stco import StcoAtom
+from .sgpd import SgpdAtom
+from .sbgp import SbgpAtom
 
 __all__ = [
     "Atom",
@@ -40,4 +42,6 @@ __all__ = [
     "StscAtom",
     "StszAtom",
     "StcoAtom",
+    "SgpdAtom",
+    "SbgpAtom",
 ]

@@ -23,3 +23,5 @@ MP4["ctts"] = CttsAtom
 MP4["stsc"] = StscAtom
 MP4["stsz"] = StszAtom
 MP4["stco"] = StcoAtom
+MP4["sgpd"] = SgpdAtom
+MP4["sbgp"] = SbgpAtom
