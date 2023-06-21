@@ -9,42 +9,41 @@ if typing.TYPE_CHECKING:
 
 class Atom(Iterator):
     """
-    Class representing an atom in an ISO Base Media File.
+    Base class representing an atom in an ISO Base Media File.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     _type : str
         The type of the atom.
     _slice : slice
         The slice representing the start and end positions of the atom in the file.
     handler : typing.BinaryIO
         The file handler of the ISO Base Media File.
-    atom_registry : typing.Type["Registry"], optional
+    atom_registry : Registry, optional
         The atom registry used to resolve atom classes (default: None).
-    type_registry : typing.Type["Registry"], optional
+    type_registry : Registry, optional
         The type registry used to resolve type classes (default: None).
+    parent : Atom, optional
+        The parent atom of this atom (default: None).
 
-    Attributes:
-    -----------
+    Attributes
+    ----------
     type : str
         The type of the atom.
     slice : slice
         The slice representing the start and end positions of the atom in the file.
     size : int
         The size of the atom.
+    handler : typing.BinaryIO
+        The file handler of the ISO Base Media File.
     properties : dict
         A dictionary containing additional properties of the atom.
+    parent : Atom
+        The parent atom of this atom.
 
     Notes:
     ------
-    - An atom represents a unit of data within an ISO Base Media File.
-    - The `_type` parameter specifies the type of the atom.
-    - The `_slice` parameter represents the range of bytes in the file occupied by the atom.
-    - The `handler` parameter is the file handler for the ISO Base Media File.
-    - The `atom_registry` parameter allows customization of atom class resolution (optional).
-    - The `type_registry` parameter allows customization of type class resolution (optional).
-    - The `type`, `slice`, `size`, and `properties` attributes provide information about the atom.
-    - The `properties` dictionary contains additional attributes of the atom.
+    - An atom represents a unit of data within an ISO Base Media File
 
     """
 
@@ -58,20 +57,22 @@ class Atom(Iterator):
         parent: typing.Type["Atom"] = None
     ) -> None:
         """
-        Initialize a new Atom object.
+        Initialize the Atom instance.
 
-        Parameters:
-        -----------
+        Parameters
+        ----------
         _type : str
             The type of the atom.
         _slice : slice
             The slice representing the start and end positions of the atom in the file.
         handler : typing.BinaryIO
             The file handler of the ISO Base Media File.
-        atom_registry : typing.Type["Registry"], optional
+        atom_registry : Registry, optional
             The atom registry used to resolve atom classes (default: None).
-        type_registry : typing.Type["Registry"], optional
+        type_registry : Registry, optional
             The type registry used to resolve type classes (default: None).
+        parent : Atom, optional
+            The parent atom of this atom (default: None).
         """
         super().__init__(handler, atom_registry, type_registry)
         self.type = _type

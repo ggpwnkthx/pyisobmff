@@ -41,6 +41,8 @@ class DrefAtom(FullAtom):
     flags : bytes
         The flags of the atom.
 
+    entry_count: int
+        The number of entries.
     entries : List[DataReference]
         The data references.
 

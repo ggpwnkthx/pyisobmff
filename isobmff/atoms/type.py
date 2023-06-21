@@ -22,6 +22,8 @@ class TypeAtom(Atom):
         The atom registry used to resolve atom classes (default: None).
     type_registry : Registry, optional
         The type registry used to resolve type classes (default: None).
+    parent : Atom, optional
+        The parent atom of this atom (default: None).
 
     Attributes:
     -----------
@@ -88,10 +90,12 @@ class TypeAtom(Atom):
             The slice representing the start and end positions of the atom in the file.
         handler : typing.BinaryIO
             The file handler of the ISO Base Media File.
-        atom_registry : typing.Type["Registry"], optional
+        atom_registry : Registry, optional
             The atom registry used to resolve atom classes (default: None).
-        type_registry : typing.Type["Registry"], optional
+        type_registry : Registry, optional
             The type registry used to resolve type classes (default: None).
+        parent : Atom, optional
+            The parent atom of this atom (default: None).
         """
         super().__init__(*args, **kwargs)
         self.properties.update(

@@ -6,13 +6,12 @@ from datetime import timedelta
 
 class MvhdAtom(FullAtom):
     """
-    Class representing the 'mvhd' atom in an ISO Base Media File.
+    Class representing a Movie Header ('mvhd') atom in an ISO Base Media File.
 
-    This class is a subclass of the FullAtom class and provides additional functionality for the 'mvhd' atom.
-    The 'mvhd' atom is commonly found in ISO Base Media Files and contains metadata about the movie.
+    This class is a subclass of the FullAtom class and provides additional functionality for handling 'mvhd' atoms.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     _type : str
         The type of the atom.
     _slice : slice
@@ -23,6 +22,8 @@ class MvhdAtom(FullAtom):
         The atom registry used to resolve atom classes (default: None).
     type_registry : Registry, optional
         The type registry used to resolve type classes (default: None).
+    parent : Atom, optional
+        The parent atom of this atom (default: None).
 
     Attributes:
     -----------
@@ -62,12 +63,12 @@ class MvhdAtom(FullAtom):
         Pre-defined field in the 'mvhd' atom.
     next_track_id : int
         The next available track ID for the movie.
-    
+
     Notes:
     ------
     - This class inherits from the FullAtom class and extends it by adding properties specific to the 'mvhd' atom.
     - The properties attribute is updated based on the version of the 'mvhd' atom (0 or 1).
-    
+
     Example:
     --------
     ```

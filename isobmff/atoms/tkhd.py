@@ -5,13 +5,12 @@ from . import FullAtom
 
 class TkhdAtom(FullAtom):
     """
-    Class representing the 'tkhd' atom in an ISO Base Media File.
+    Class representing a Track Header (tkhd) atom in an ISO Base Media File Format (ISOBMFF).
 
-    This class is a subclass of the FullAtom class and provides additional functionality for the 'tkhd' atom.
-    The 'tkhd' atom is commonly found in ISO Base Media Files and contains metadata about a track.
+    This class is a subclass of the FullAtom class and provides additional functionality for handling tkhd atoms.
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
     _type : str
         The type of the atom.
     _slice : slice
@@ -22,6 +21,8 @@ class TkhdAtom(FullAtom):
         The atom registry used to resolve atom classes (default: None).
     type_registry : Registry, optional
         The type registry used to resolve type classes (default: None).
+    parent : Atom, optional
+        The parent atom of this atom (default: None).
 
     Attributes:
     -----------
@@ -40,7 +41,7 @@ class TkhdAtom(FullAtom):
         The version of the full atom.
     flags : bytes
         The flags of the full atom.
-        
+
     creation_time : datetime.datetime
         The creation time of the track.
     modification_time : datetime.datetime
@@ -67,7 +68,7 @@ class TkhdAtom(FullAtom):
         The width of the track.
     height : int
         The height of the track.
-        
+
     Notes:
     ------
     - This class inherits from the FullAtom class and extends it by adding properties specific to the 'tkhd' atom.
