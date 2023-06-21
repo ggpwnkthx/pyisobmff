@@ -93,6 +93,7 @@ class ElstAtom(FullAtom):
                 self._handler,
                 self._atom_registry,
                 self._type_registry,
+                self,
                 version=self.version,
             )
 
