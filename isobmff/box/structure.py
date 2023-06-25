@@ -154,7 +154,7 @@ class Box:
         if self.has_children:
             return CachedIterator(
                 self.slice.subslice(self.header_size, self.size),
-                lambda this: Box(this.slice, self.parent),
+                lambda this: Box(this.slice, self)
             )
         return None
 

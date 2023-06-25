@@ -188,7 +188,7 @@ class Slice:
             data = self.read_until(until=terminator)
         else:
             data = self.read()
-            
+
         if args or kwargs:
             return data.decode(*args, **kwargs)
         return auto_decode(data)
@@ -269,6 +269,7 @@ class CachedIterator:
         self.__cache_iter = iter(self.__cache)
         self.__count = count
         self.__stop = False
+        self.__end = slice.stop
 
     def __iter__(self):
         return self
@@ -293,13 +294,17 @@ class CachedIterator:
         if not self.__stop:
             try:
                 item = self.item_finder(self)
-                if item.size is None or item.size == 0:
+                if (
+                    item.size is None
+                    or item.size == 0
+                    or self.slice.start == self.__end
+                ):
                     raise EOFError("Reached the end of the file.")
             except EOFError:
                 self.__stop = True
                 raise StopIteration
 
-            self.slice = self.slice.subslice(item.size)
+            self.slice = self.slice.subslice(item.size, self.slice.stop)
             self.__cache.append(item)
             if self.__count == len(self.__cache):
                 self.__stop = True
