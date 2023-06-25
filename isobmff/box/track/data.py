@@ -20,30 +20,29 @@ class DataInformationBox(Box):
 
 class DataEntryUrlBox(FullBox, ChildlessBox):
     @functools.cached_property
-    def handler_type(self) -> str:
+    def location(self) -> str:
         start = super().header_size
-        return self.slice.subslice(start, self.end).decode()
+        return self.slice.subslice(start).decode(terminator="\x00")
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return super().header_size + len(self.location) + 1
 
 
 class DataEntryUrnBox(FullBox, ChildlessBox):
     @functools.cached_property
     def name(self) -> str:
         start = super().header_size
-        stop = self.slice.read().find(b"\x00", start)
-        return self.slice.subslice(start, stop).decode()
+        return self.slice.subslice(start).decode(terminator="\x00")
 
     @functools.cached_property
     def location(self) -> str:
         start = super().header_size + len(self.name) + 1
-        return self.slice.subslice(start, self.end).decode()
+        return self.slice.subslice(start).decode(terminator="\x00")
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return super().header_size + len(self.name) + len(self.location) + 2
 
 
 class DataReferenceBox(FullBox):

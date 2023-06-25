@@ -3,6 +3,7 @@ File: isobmff/slice.py
 
 Contains the Slice class, which represents a slice of a binary file
 """
+from .utils import auto_decode
 import struct
 import typing
 
@@ -121,7 +122,48 @@ class Slice:
             raise EOFError("Reached the end of the file.")
         return data
 
-    def decode(self, *args, **kwargs) -> str:
+    def read_until(self, start: int = None, until: bytes = b"\x00") -> bytes:
+        """
+        Read data from the slice until a byte matching the 'until' argument is encountered.
+
+        Parameters
+        ----------
+        start : int, optional
+            The start position to read from within the slice, by default None
+        until : bytes, optional
+            The byte to match until while reading, by default b'\x00'
+
+        Returns
+        -------
+        bytes
+            The read data from the slice until the specified byte is encountered.
+
+        Raises
+        ------
+        EOFError
+            If the end of the file is reached.
+
+        """
+        if start:
+            start = self.start + start
+        else:
+            start = self.start
+
+        if self.handler.tell() != start:
+            self.handler.seek(start)
+
+        data = bytearray()
+        while True:
+            byte = self.handler.read(1)
+            if not byte:
+                raise EOFError("Reached the end of the file.")
+            if byte == until:
+                break
+            data += byte
+
+        return bytes(data)
+
+    def decode(self, *args, terminator: bytes = None, **kwargs) -> str:
         """
         Decode the slice using the specified encoding.
 
@@ -142,7 +184,14 @@ class Slice:
             args = self._decode
         if not len(kwargs) and isinstance(self._decode, dict):
             kwargs = self._decode
-        return self.read().decode(*args, **kwargs)
+        if terminator:
+            data = self.read_until(until=terminator)
+        else:
+            data = self.read()
+            
+        if args or kwargs:
+            return data.decode(*args, **kwargs)
+        return auto_decode(data)
 
     def unpack(self, __format: typing.Union[str, bytes] = None):
         """
@@ -213,7 +262,7 @@ class Slice:
 
 
 class CachedIterator:
-    def __init__(self, slice: Slice, item_finder: typing.Callable, count:int = None):
+    def __init__(self, slice: Slice, item_finder: typing.Callable, count: int = None):
         self.slice = slice
         self.item_finder = item_finder
         self.__cache = []
