@@ -48,8 +48,19 @@ class TrackSelectionBox(FullBox, ChildlessBox):
 
 
 class KindBox(Box):
-    # Not implemented
-    pass
+    @functools.cached_property
+    def schemeURI(self) -> str:
+        start = super().header_size
+        return self.slice.subslice(start).decode(terminator="\x00")
+
+    @functools.cached_property
+    def value(self) -> str:
+        start = super().header_size + 1 + len(self.schemeURI)
+        return self.slice.subslice(start).decode(terminator="\x00")
+
+    @property
+    def header_size(self) -> int:
+        return super().header_size + 2 + len(self.schemeURI) + len(self.value)
 
 
 BOX_TYPES.update(
@@ -57,6 +68,6 @@ BOX_TYPES.update(
         "udta": UserDataBox,  # 8.10.1
         "cprt": CopyrightBox,  # 8.10.2
         "tsel": TrackSelectionBox,  # 8.10.3
-        # "kind": KindBox,  # 8.10.4
+        "kind": KindBox,  # 8.10.4
     }
 )
