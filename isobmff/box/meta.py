@@ -24,6 +24,7 @@ class XMLBox(FullBox, ChildlessBox):
     @functools.cached_property
     def handler_type(self) -> str:
         start = super().header_size
+        self.slice.subslice(start, start + 1).read()
         return self.slice.subslice(start, self.end).decode()
 
     @property
@@ -226,7 +227,7 @@ class ItemLocationEntryExtent:
 
     @functools.cached_property
     def size(self):
-        self.parent.extent_size
+        return self.parent.extent_size
 
 
 class PrimaryItemBox(FullBox):
@@ -266,8 +267,153 @@ class FDItemInfoExtension(ItemInfoExtension):
 
 
 class ItemInfoEntry(FullBox):
-    # Not implemented
-    pass
+    @functools.cached_property
+    def item_ID(self) -> int:
+        start = super().header_size
+        if self.version == 0 or self.version == 1 or self.version == 2:
+            return self.slice.subslice(start, start + 2).unpack(">H")[0]
+        elif self.version == 3:
+            return self.slice.subslice(start, start + 4).unpack(">I")[0]
+
+    @functools.cached_property
+    def item_protection_index(self) -> int:
+        if self.version == 0 or self.version == 1 or self.version == 2:
+            start = super().header_size + 2
+            return self.slice.subslice(start, start + 2).unpack(">H")[0]
+        elif self.version == 3:
+            start = super().header_size + 4
+            return self.slice.subslice(start, start + 4).unpack(">I")[0]
+
+    @functools.cached_property
+    def item_type(self) -> str:
+        if self.version == 0 or self.version == 1:
+            return None
+        elif self.version == 2:
+            start = super().header_size + 4
+        elif self.version == 3:
+            start = super().header_size + 8
+        return self.slice.subslice(start, start + 4).decode()
+
+    @functools.cached_property
+    def item_name(self) -> str:
+        if self.version == 0 or self.version == 1:
+            start = super().header_size + 4
+        elif self.version == 2:
+            start = super().header_size + 8
+        elif self.version == 3:
+            start = super().header_size + 10
+        return self.slice.subslice(start).decode(terminator="\x00")
+
+    @functools.cached_property
+    def content_type(self) -> str:
+        if self.version == 0 or self.version == 1:
+            start = super().header_size + 5 + len(self.item_name)
+        elif self.version == 2:
+            if self.item_type != "mime":
+                return None
+            start = super().header_size + 9 + len(self.item_name)
+        elif self.version == 3:
+            if self.item_type != "mime":
+                return None
+            start = super().header_size + 11 + len(self.item_name)
+        return self.slice.subslice(start).decode(terminator="\x00")
+
+    @functools.cached_property
+    def content_encoding(self) -> str:
+        if self.version == 0 or self.version == 1:
+            start = (
+                super().header_size + 6 + len(self.item_name) + len(self.content_type)
+            )
+        elif self.version == 2:
+            if self.item_type != "mime":
+                return None
+            start = (
+                super().header_size + 10 + len(self.item_name) + len(self.content_type)
+            )
+        elif self.version == 3:
+            if self.item_type != "mime":
+                return None
+            start = (
+                super().header_size + 12 + len(self.item_name) + len(self.content_type)
+            )
+        if start < self.end:
+            return self.slice.subslice(start).decode(terminator="\x00")
+
+    @functools.cached_property
+    def extension_type(self) -> int:
+        if self.version == 1:
+            start = (
+                super().header_size
+                + 6
+                + len(self.item_name)
+                + len(self.content_type)
+                + (1 + len(self.content_encoding) if self.content_encoding else 0)
+            )
+            if start < self.end:
+                return self.slice.subslice(start, start + 4).unpack(">I")[0]
+        return None
+
+    @functools.cached_property
+    def extensions(self):
+        if self.version == 1:
+            pass
+        return None
+
+    @functools.cached_property
+    def item_uri_type(self):
+        if self.item_type == "uri ":
+            if self.version == 2:
+                start = (
+                    super().header_size
+                    + 9
+                    + len(self.item_name)
+                )
+            elif self.version == 3:
+                start = (
+                    super().header_size
+                    + 11
+                    + len(self.item_name)
+                )
+            return self.slice.subslice(start).decode(terminator="\x00")
+        return None
+
+    @property
+    def header_size(self) -> int:
+        if self.version == 0:
+            return (
+                super().header_size
+                + 6
+                + len(self.item_name)
+                + len(self.content_type)
+                + (1 + len(self.content_encoding) if self.content_encoding else 0)
+            )
+        elif self.version == 1:
+            return (
+                super().header_size
+                + 6
+                + len(self.item_name)
+                + len(self.content_type)
+                + (1 + len(self.content_encoding) if self.content_encoding else 0)
+                + (4 if self.extension_type else 0)
+            )
+        elif self.version == 2:
+            return (
+                super().header_size
+                + 9
+                + len(self.item_name)
+                + (1 + len(self.content_type) if self.content_type else 0)
+                + (1 + len(self.content_encoding) if self.content_encoding else 0)
+                + (1 + len(self.item_uri_type) if self.item_uri_type else 0)
+            )
+        elif self.version == 3:
+            return (
+                super().header_size
+                + 11
+                + len(self.item_name)
+                + (1 + len(self.content_type) if self.content_type else 0)
+                + (1 + len(self.content_encoding) if self.content_encoding else 0)
+                + (1 + len(self.item_uri_type) if self.item_uri_type else 0)
+            )
 
 
 class ItemInfoBox(FullBox):
@@ -285,12 +431,11 @@ class ItemInfoBox(FullBox):
             start = super().header_size + 2
         elif self.version == 1:
             start = super().header_size + 4
-        entries = []
-        for _ in range(self.entry_count):
-            entry = ItemInfoEntry(self.slice.subslice(start))
-            entries.append(entry)
-            start += entry.size
-        return entries
+        return CachedIterator(
+            self.slice.subslice(start, self.end),
+            lambda this: ItemInfoEntry(this.slice, self),
+            self.entry_count,
+        )
 
     @property
     def header_size(self) -> int:
@@ -420,7 +565,7 @@ BOX_TYPES.update(
         "pitm": PrimaryItemBox,  # 8.11.4
         "ipro": ItemProtectionBox,  # 8.11.5
         "fdel": FDItemInfoExtension,  # 8.11.6
-        # "infe": ItemInfoEntry,  # 8.11.6
+        "infe": ItemInfoEntry,  # 8.11.6
         "iinf": ItemInfoBox,  # 8.11.6
         "meco": AdditionalMetadataContainerBox,  # 8.11.7
         "mere": MetaboxRelationBox,  # 8.11.8
