@@ -1,26 +1,41 @@
-# File: libs/utils/isobmff/__init__.py
+"""
+File: isobmff/__init__.py
 
-from .iterator import Iterator
-from .registries.mp4 import MP4
-from .registries.types import DECODERS
+The main package for the ISO Base Media File Format (ISO/IEC 14496-12:2015)
+"""
+from .box import Box, BOX_TYPES
+from .slice import Slice, CachedIterator
+import typing
+
+
+class Scanner(CachedIterator):
+    """
+    Class representing an ISO Base Media File Format (ISOBMFF) file.
+
+    This class provides functionality for working with ISOBMFF files. It allows iterating over the boxes
+    in the file on-demand and provides thread-safe access to the file's data.
+
+    Parameters
+    ----------
+    handler : typing.BinaryIO
+        The binary file handler for the ISOBMFF file.
+
+    Examples
+    --------
+    >>> with open('file.mp4', 'rb') as f:
+    ...     isobmff = ISOBMFF(f)
+    ...     for box in isobmff:
+    ...         print(box)
+    """
+
+    def __init__(self, handler: typing.BinaryIO):
+        super().__init__(
+            Slice(handler),
+            lambda this: Box(this.slice),
+        )
 
 
 __all__ = [
-    "Iterator",
-    "MP4",
-    "DECODERS",
+    "Scanner",
+    "BOX_TYPES",
 ]
-
-def crawl(iso: Iterator, indent=0) -> None:
-    """Prints a tree of atoms in an ISO Base Media File.
-
-    Parameters:
-    iso : Iterator
-        The Iterator instance for the ISO Base Media File.
-    """
-    for atom in iso:
-        if issubclass(type(atom), Iterator):
-            print("  " * indent + f"{atom.type}")
-            crawl(atom, indent+1)
-        else:
-            print("  " * indent + f"{atom}")
