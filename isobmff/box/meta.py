@@ -24,8 +24,7 @@ class XMLBox(FullBox, ChildlessBox):
     @functools.cached_property
     def handler_type(self) -> str:
         start = super().header_size
-        self.slice.subslice(start, start + 1).read()
-        return self.slice.subslice(start, self.end).decode()
+        return self.slice.subslice(start).decode(terminator="\x00")
 
     @property
     def header_size(self) -> int:
