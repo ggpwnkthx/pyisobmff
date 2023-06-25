@@ -24,6 +24,7 @@ from .track.sub import *  # 8.14
 from .movie.post_decoder import *  # 8.15
 from .segment import *  # 8.16
 from .track.incomplete import *  # 8.17
+from .track.media.handler import *  # 12
 
 
 __all__ = [

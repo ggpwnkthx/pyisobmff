@@ -1,11 +1,11 @@
 """
-File: isobmff/box/track/media.py
+File: isobmff/box/track/media/__init__.py
 
 Contains all the classes specified in section 8.4 of ISO/IEC 14496-12:2015
 Class property formats and sizes have been verified.
 """
-from .. import BOX_TYPES, Box, FullBox, ChildlessBox
-from ...utils import iso639_2T_to_chars
+from ... import BOX_TYPES, Box, FullBox, ChildlessBox
+from ....utils import iso639_2T_to_chars
 import functools
 import typing
 
