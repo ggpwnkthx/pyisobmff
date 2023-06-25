@@ -147,6 +147,12 @@ class ProducerReferenceTimeBox(FullBox):
             return self.slice.subslice(start, start + 4).unpack(">I")[0]
         return self.slice.subslice(start, start + 8).unpack(">Q")[0]
 
+    @property
+    def header_size(self) -> int:
+        if self.version == 0:
+            return super().header_size + 16
+        return super().header_size + 20
+
 
 BOX_TYPES.update(
     {
