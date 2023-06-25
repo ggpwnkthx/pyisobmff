@@ -96,7 +96,7 @@ class HandlerBox(FullBox, ChildlessBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.sizee
 
 
 class MediaInformationBox(Box):
@@ -115,7 +115,7 @@ class ExtendedLanguageBox(FullBox, ChildlessBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.size
 
 BOX_TYPES.update(
     {

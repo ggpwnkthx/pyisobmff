@@ -26,7 +26,7 @@ class CopyrightBox(FullBox, ChildlessBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.size
 
 
 class TrackSelectionBox(FullBox, ChildlessBox):
@@ -44,7 +44,7 @@ class TrackSelectionBox(FullBox, ChildlessBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.size
 
 
 class KindBox(Box):

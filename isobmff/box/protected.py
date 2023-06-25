@@ -38,7 +38,7 @@ class SchemeTypeBox(FullBox, ChildlessBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.size
 
 class SchemeInformationBox(Box):
     pass

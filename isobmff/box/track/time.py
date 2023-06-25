@@ -156,7 +156,7 @@ class SampleDependencyTypeBox(FullBox):
 
     @property
     def header_size(self) -> int:
-        return self.end
+        return self.size
 
 
 class EditBox(Box):
