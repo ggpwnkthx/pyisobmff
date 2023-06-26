@@ -108,39 +108,49 @@ You can kind of treat `Scanner` and `Box` objects like lists and dictionaries by
 ```python
 import isobmff
 
+# Open the .mp4 file in binary read mode
 fh = open("path/to/file.mp4", mode="rb")
+
+# Create an ISOBMFF scanner object to parse the .mp4 file
 iso = isobmff.Scanner(fh)
 
+# Iterate over the media tracks in the file
 for track in iso["moov"]["trak"]:
-    print(track["mdia"]["hdlr"].handler_type)
+    # Check if the track is a video track
+    if track["mdia"]["hdlr"].handler_type == "vide":
+        # Calculate the aspect ratio of the video
+        ratio = track["tkhd"].width / track["tkhd"].height
+        # Calculate the duration of the video in seconds
+        duration = track["mdia"]["mdhd"].duration / track["mdia"]["mdhd"].timescale
+        # Get the number of frames in the video
+        frames = track["mdia"]["minf"]["stbl"]["stsz"].sample_count
+        # Calculate the frame rate of the video
+        fps = frames / duration
+        # Get the codec used for the video track
+        codec = [
+            codec for codec in track["mdia"]["minf"]["stbl"]["stsd"].sample_entries
+        ][0].type
+
+        # Print the aspect ratio, duration, frame rate, and codec of the video track
+        print((ratio, duration, fps, codec))
+
+    # Check if the track is an audio track
+    elif track["mdia"]["hdlr"].handler_type == "soun":
+        # Get the sample rate of the audio track
+        sample_rate = track["mdia"]["mdhd"].timescale
+        # Calculate the duration of the audio in seconds
+        duration = track["mdia"]["mdhd"].duration / sample_rate
+        # Get the codec used for the audio track
+        codec = [
+            codec for codec in track["mdia"]["minf"]["stbl"]["stsd"].sample_entries
+        ][0].type
+
+        # Print the sample rate, duration, and codec of the audio track
+        print((sample_rate, duration, codec))
+
 ```
 
 ### Crawler
-
-### Remote
-
-```python
-import isobmff
-import fsspec
-
-fh = fs.open(
- "https://download.samplelib.com/mp4/sample-30s.mp4",
- mode="rb",
-)
-iso = isobmff.Scanner(fh)
-
-for track in [
- iso[-1][0][1]
- iso[-1][0][2]
-]:
- if track.type == "vide":
-  print((track.duration, track.width, track.height))
- if track.type == "soun":
-  print((track.duration, track.volume))
-
-# (1, 30367, 1920.0, 1080.0)
-# (2, 30465, 1.0)
-```
 
 ```python
 import isobmff
@@ -169,6 +179,42 @@ crawl(iso)
 #    <MediaHeaderBox(type=mdhd,start=21623777,end=21638846,size=32,has_children=False,version=0)>
 #    <HandlerBox(type=hdlr,start=21623809,end=43262623,size=95,has_children=False,version=0)>
 #    ...
+```
+
+### Remote
+
+```python
+import isobmff
+import fsspec
+
+# Create a filesystem object for handling files
+fs = fsspec.filesystem("http")
+
+# Open the .mp4 file from the URL in binary read mode
+fh = fs.open(
+    "https://download.samplelib.com/mp4/sample-30s.mp4",
+    mode="rb",
+)
+
+# Create an ISOBMFF scanner object to parse the .mp4 file
+iso = isobmff.Scanner(fh)
+
+# Iterate over the two known track positions
+for track in [
+    iso[-1][1],
+    iso[-1][2],
+]:
+    # Check the known handler position to determin the track type
+    if track[2][1].handler_type == "vide":
+        # Print the duration, width, and height of the video track
+        print((track[0].duration, track[0].width, track[0].height))
+    if track[2][1].handler_type == "soun":
+        # Print the duration and volume of the audio track
+        print((track[0].duration, track[0].volume))
+
+# The output is:
+# (30367, 1920.0, 1080.0)
+# (30465, 1.0)
 ```
 
 ## Todo
