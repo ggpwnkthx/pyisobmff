@@ -1,12 +1,16 @@
 # pyisobmff
 
-`pyisobmff` is a Python library that implements the ISO/IEC 14496-12:2015 standard, also known as the ISO Base Media File Format (ISOBMFF). This standard specifies the structure and usage of media files that can be used to store timed media information. The intention of this project is to provide a way to lazy load only the ISOBMFF box data that the user needs, and to adaptively seek and ignore data that is not needed.
+This is a Python library that implements the ISO/IEC 14496-12:2015 standard, also known as the ISO Base Media File Format (ISOBMFF). This standard specifies the structure and usage of media files that can be used to store timed media information.
+
+The library is structured around the concept of "boxes", which are the basic building blocks of ISOBMFF files. Each box represents a specific piece of data or metadata in the file. The library provides classes for most types of boxes, allowing you to read the data they contain.
+
+The intention of this project is to provide a way to lazy-load only the ISOBMFF box data that you need, and to adaptively seek to and ignore data that you don't needed.
 
 ## Features
 
 - Provides classes that represent different components of the ISO/IEC 14496-12:2015 standard.
 - Lazy loading of ISOBMFF box data as needed.
-- Adaptively seeks and ignores unneeded data.
+- Adaptively seeks to and ignores data.
 - Includes type hinting for better code readability and static analysis.
 - Extendible Box type registry.
 

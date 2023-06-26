@@ -34,7 +34,8 @@ class Slice:
     decode : str, optional
         The encoding to use when decoding the slice, by default None
     unpack : Union[str, bytes], optional
-        The format string for struct.unpack to use when unpacking the slice, by default None
+        The format string for struct.unpack to use when unpacking the slice,
+        by default None
 
     Attributes
     ----------
@@ -124,7 +125,8 @@ class Slice:
 
     def read_until(self, start: int = None, until: bytes = b"\x00") -> bytes:
         """
-        Read data from the slice until a byte matching the 'until' argument is encountered.
+        Read data from the slice until a byte matching the 'until' argument
+        is encountered.
 
         Parameters
         ----------
@@ -136,7 +138,8 @@ class Slice:
         Returns
         -------
         bytes
-            The read data from the slice until the specified byte is encountered.
+            The read data from the slice until the specified byte is
+            encountered.
 
         Raises
         ------
@@ -214,7 +217,8 @@ class Slice:
 
     def iter_unpack(self, __format: typing.Union[str, bytes] = None):
         """
-        Iterate over the slice, unpacking values based on the specified format string.
+        Iterate over the slice, unpacking values based on the specified
+        format string.
 
         Parameters
         ----------
@@ -262,6 +266,41 @@ class Slice:
 
 
 class CachedIterator:
+    """
+    This class provides an iterator that caches the items it iterates over.
+    It is used to iterate over a `Slice` object, finding items within the
+    slice using a provided `item_finder` function. The items found are cached
+    so they can be accessed again without needing to recompute them.
+
+    Parameters
+    ----------
+    slice : Slice
+        The `Slice` object to iterate over.
+    item_finder : Callable
+        A function that takes a `Slice` object and returns the next item in
+        the slice.
+    count : int, optional
+        The number of items to find in the slice. If not provided, the
+        iterator will continue until it reaches the end of the slice.
+
+    Attributes
+    ----------
+    slice : Slice
+        The `Slice` object being iterated over.
+    item_finder : Callable
+        The function used to find items in the slice.
+    __cache : list
+        A list of items that have been found in the slice.
+    __cache_iter : iterator
+        An iterator over the cached items.
+    __count : int
+        The number of items to find in the slice.
+    __stop : bool
+        A flag indicating whether the iterator has reached the end of the
+        slice.
+    __end : int
+        The end position of the slice.
+    """
     def __init__(self, slice: Slice, item_finder: typing.Callable, count: int = None):
         self.slice = slice
         self.item_finder = item_finder
@@ -275,6 +314,10 @@ class CachedIterator:
         return self
 
     def __next__(self):
+        """
+        Return the next item in the slice, or raise StopIteration if
+        there are no more items.
+        """
         if self.__stop:
             
             try:
@@ -304,6 +347,10 @@ class CachedIterator:
             return item
 
     def __getitem__(self, index: int):
+        """
+        Return the item at the given index. If the item is not in the cache,
+        iterate over the slice until it is found.
+        """
         if index >= 0:
             if index < len(self.__cache):
                 return self.__cache[index]
