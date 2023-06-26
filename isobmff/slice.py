@@ -283,7 +283,7 @@ class CachedIterator:
         Returns
         -------
         Any
-            The next item in the slice.
+            The next item in the slice. The item MUST have a size property.
 
         Raises
         ------
@@ -293,11 +293,12 @@ class CachedIterator:
         """
         if not self.__stop:
             try:
+                if self.slice.start == self.__end:
+                    raise EOFError("Reached the end of the file.")
                 item = self.item_finder(self)
                 if (
                     item.size is None
                     or item.size == 0
-                    or self.slice.start == self.__end
                 ):
                     raise EOFError("Reached the end of the file.")
             except EOFError:
