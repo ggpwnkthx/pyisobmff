@@ -39,3 +39,5 @@ __all__ = [
     "Scanner",
     "BOX_TYPES",
 ]
+
+__version__ = "1.0.0"
