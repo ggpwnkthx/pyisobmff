@@ -3,13 +3,17 @@
 `pyisobmff` is a Python library that implements the ISO/IEC 14496-12:2015 standard, also known as the ISO Base Media File Format (ISOBMFF). This standard specifies the structure and usage of media files that can be used to store timed media information. The intention of this project is to provide a way to lazy load only the ISOBMFF box data that the user needs, and to adaptively seek and ignore data that is not needed.
 
 ## Features
+
 - Provides classes that represent different components of the ISO/IEC 14496-12:2015 standard.
 - Lazy loading of ISOBMFF box data as needed.
 - Adaptively seeks and ignores unneeded data.
 - Includes type hinting for better code readability and static analysis.
+- Extendible Box type registry.
 
-### Implemented Types
+### Implemented Box Types
+
 95 Unique Types + 9 Aliases
+
 ```
 bxml cdsc cinf cprt ctts dref dinf edts elng elst
 fdel font ftyp free frma hint hdlr hind iinf idat
@@ -24,19 +28,70 @@ trak trgr trun trun trun tsel txtC udta url  urn
 vdep vmhd vplx xml
 ```
 
+### Custom Box Types
+
+To add or overwrite existing Box types, update the `BOX_TYPES` global dictionary accessible from the `isobmff` module. The key should be the 4-byte `type` as a string and the value should be the class to use.
+
+#### Example
+
+```python
+import isobmff
+import functools
+
+class CustomBox(isobmff.box.FullBox):
+  @functools.cached_property
+  def custom_ID(self) -> int:
+    start = super().header_size
+    if self.version == 0:
+      # 16-bit unsigned integer
+      return self.slice.subslice(start, start + 2).unpack(">H")[0]
+    elif self.version == 1:
+      # 32-bit unsigned integer
+      return self.slice.subslice(start, start + 4).unpack(">I")[0]
+    # 64-bit unsigned integer
+    return self.slice.subslice(start, start + 8).unpack(">I")[0]
+
+  @functools.cached_property
+  def duration(self) -> int:
+    if self.version == 0:
+      start = super().header_size + 2
+    elif self.version == 1:
+      start = super().header_size + 4
+    else:
+      start = super().header_size + 8
+    return self.slice.subslice(start, start + 8).unpack(">Q")[0]
+
+  @property
+  def header_size(self) -> int:
+    if self.version == 0:
+      return super().header_size + 2 + 8
+    elif self.version == 1:
+      return super().header_size + 4 + 8
+    return super().header_size + 8 + 8
+
+isobmff.BOX_TYPES.update({
+  "type": CustomBox
+})
+```
+
 ## Caveats
+
 - Box types that have not been implemented will have a `type` and `size` but their properties and children will not be parsed.
 - AI was used to help generate some of the classes based on the pseudo code in the ISO/IEC 14496-12:2015 documentation. The majority have been manually reviewed and tested, but there are some that have not been tested, yet.
 
 ## Installation
+
 As the library is not registered with pip, you can install it with the following pip command:
+
 ```
 pip install git+https://github.com/ggpwnkthx/pyisobmff
 ```
 
 ### Optional Packages
+
 #### [chardet](https://github.com/chardet/chardet)
-This package attempts to detect string encodings and automatically decode them. If this is not installed only UTF-8, UTF-16 BE/LE, and UTF-32 BE/LE encodings are supported. 
+
+This package attempts to detect string encodings and automatically decode them. If this is not installed only UTF-8, UTF-16 BE/LE, and UTF-32 BE/LE encodings are supported.
 
 Non-standard and/or future standard Base Media formats may require an expanded set of string decoders.
 
@@ -45,7 +100,9 @@ Non-standard and/or future standard Base Media formats may require an expanded s
 This package make working with remote files very convenient.
 
 ## Usage
+
 ### Basic
+
 ```python
 import isobmff
 
@@ -74,7 +131,9 @@ crawl(iso)
 #    <HandlerBox(type=hdlr,start=21623809,end=43262623,size=95,has_children=False,version=0)>
 #    ...
 ```
+
 ### Remote
+
 ```python
 import isobmff
 import fsspec
@@ -86,7 +145,7 @@ fh = fs.open(
 iso = isobmff.Scanner(fh)
 
 for track in [
- iso[-1][0][1] 
+ iso[-1][0][1]
  iso[-1][0][2]
 ]:
  if track.type == "vide":
@@ -99,16 +158,20 @@ for track in [
 ```
 
 ## Todo
+
 - Implement missing box types.
 - Improve error handling for unsupported box types.
 - Add more examples to the usage section.
 - Explain box type pattern.
 
 ## Contributing
+
 Contributions are welcome! Please feel free to submit a pull request.
 
 ## Authors
+
 - [Isaac Jessup](https://github.com/ggpwnkthx)
 
 ## License
+
 This project is licensed under the GPL-3.0-or-later
