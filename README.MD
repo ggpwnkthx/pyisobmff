@@ -9,6 +9,7 @@
 - Includes type hinting for better code readability and static analysis.
 
 ### Implemented Types
+95 Unique Types + 9 Aliases
 ```
 bxml cdsc cinf cprt ctts dref dinf edts elng elst
 fdel font ftyp free frma hint hdlr hind iinf idat
