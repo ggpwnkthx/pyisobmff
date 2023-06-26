@@ -107,5 +107,8 @@ for track in [
 ## Contributing
 Contributions are welcome! Please feel free to submit a pull request.
 
+## Authors
+- [Isaac Jessup](https://github.com/ggpwnkthx)
+
 ## License
-This project is licensed under the terms of the MIT license.
+This project is licensed under the GPL-3.0-or-later
