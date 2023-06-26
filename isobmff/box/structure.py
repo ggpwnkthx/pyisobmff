@@ -142,7 +142,9 @@ class Box:
 
     @property
     def header_size(self) -> int:
-        self.size
+        # If box type isn't implemented yet, don't expose children.
+        if type(self).__name__ == "Box" and self.size:
+            return self.size
         return 8 + (8 if self._ext_size else 0) + (16 if self.usertype else 0)
 
     @functools.cached_property
