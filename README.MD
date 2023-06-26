@@ -38,37 +38,45 @@ To add or overwrite existing Box types, update the `BOX_TYPES` global dictionary
 import isobmff
 import functools
 
+# Define a new class, CustomBox, which inherits from the FullBox class in the isobmff.box module.
 class CustomBox(isobmff.box.FullBox):
+  # Define a cached property, custom_ID. The @functools.cached_property decorator means that the function's return value will be cached, so it only needs to be computed once.
   @functools.cached_property
   def custom_ID(self) -> int:
+    # Calculate the start position of the custom_ID field in the box.
     start = super().header_size
+    # If the version of the box is 0, the custom_ID is a 16-bit unsigned integer.
     if self.version == 0:
-      # 16-bit unsigned integer
       return self.slice.subslice(start, start + 2).unpack(">H")[0]
+    # If the version of the box is 1, the custom_ID is a 32-bit unsigned integer.
     elif self.version == 1:
-      # 32-bit unsigned integer
       return self.slice.subslice(start, start + 4).unpack(">I")[0]
-    # 64-bit unsigned integer
+    # Otherwise, the custom_ID is a 64-bit unsigned integer.
     return self.slice.subslice(start, start + 8).unpack(">I")[0]
 
   @functools.cached_property
   def duration(self) -> int:
+    # Calculate the start position of the duration field in the box, which depends on the version of the box.
     if self.version == 0:
       start = super().header_size + 2
     elif self.version == 1:
       start = super().header_size + 4
     else:
       start = super().header_size + 8
+    # The duration is a 64-bit unsigned integer.
     return self.slice.subslice(start, start + 8).unpack(">Q")[0]
 
+  # Define a property, header_size. This is used to determine if there are child boxes and where to find them.
   @property
   def header_size(self) -> int:
+    # The size of the header depends on the version of the box.
     if self.version == 0:
       return super().header_size + 2 + 8
     elif self.version == 1:
       return super().header_size + 4 + 8
     return super().header_size + 8 + 8
 
+# Add the CustomBox class to the dictionary of box types in the isobmff module.
 isobmff.BOX_TYPES.update({
   "type": CustomBox
 })
@@ -97,7 +105,13 @@ Non-standard and/or future standard Base Media formats may require an expanded s
 
 #### [fsspec](https://github.com/fsspec/filesystem_spec)
 
-This package make working with remote files very convenient.
+This library is designed to provide a high-level interface for working with different file systems. It supports a wide range of file systems, including local file systems, FTP, SFTP, HTTP, HTTPS, Amazon S3, Google Cloud Storage, and Hadoop Distributed File System (HDFS). It's particularly useful when you need to work with large datasets that are stored across multiple file systems.
+
+#### [smart_open](https://github.com/fsspec/filesystem_spec)
+
+This library serves a similar purpose as fsspec but is more focused on providing a simple way to stream large files, whether they're stored locally or in the cloud. It supports local file systems, Amazon S3, Google Cloud Storage, and HTTP/HTTPS. 
+
+For files that are accessible strictly via HTTP(S), not S3 or any other wrapping protocol, I would suggest using fsspec.
 
 ## Usage
 
@@ -221,8 +235,6 @@ for track in [
 
 - Implement missing box types.
 - Improve error handling for unsupported box types.
-- Add more examples to the usage section.
-- Explain box type pattern.
 
 ## Contributing
 
