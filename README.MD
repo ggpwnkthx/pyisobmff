@@ -26,6 +26,7 @@ vdep vmhd vplx xml
 
 ## Caveats
 - Box types that have not been implemented will have a `type` and `size` but their properties and children will not be parsed.
+- AI was used to help generate some of the classes based on the pseudo code in the ISO/IEC 14496-12:2015 documentation. The majority have been manually reviewed and tested, but there are some that have not been tested, yet.
 
 ## Installation
 As the library is not registered with pip, you can install it with the following pip command:
@@ -101,6 +102,7 @@ for track in [
 - Implement missing box types.
 - Improve error handling for unsupported box types.
 - Add more examples to the usage section.
+- Explain box type pattern.
 
 ## Contributing
 Contributions are welcome! Please feel free to submit a pull request.
