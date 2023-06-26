@@ -275,23 +275,14 @@ class CachedIterator:
         return self
 
     def __next__(self):
-        """
-        Uses the item_finder function to determine the what the next item
-        object. The object must have a size property to determing the
-        poistion of the item following it.
-
-        Returns
-        -------
-        Any
-            The next item in the slice. The item MUST have a size property.
-
-        Raises
-        ------
-        StopIteration
-            If there are no more items to get.
-
-        """
-        if not self.__stop:
+        if self.__stop:
+            
+            try:
+                return next(self.__cache_iter)
+            except StopIteration:
+                self.__cache_iter = iter(self.__cache)
+                raise StopIteration
+        else:       
             try:
                 if self.slice.start == self.__end:
                     raise EOFError("Reached the end of the file.")
@@ -303,6 +294,7 @@ class CachedIterator:
                     raise EOFError("Reached the end of the file.")
             except EOFError:
                 self.__stop = True
+                self.__cache_iter = iter(self.__cache)
                 raise StopIteration
 
             self.slice = self.slice.subslice(item.size, self.slice.stop)
@@ -310,7 +302,6 @@ class CachedIterator:
             if self.__count == len(self.__cache):
                 self.__stop = True
             return item
-        return next(self.__cache_iter)
 
     def __getitem__(self, index: int):
         if index >= 0:
