@@ -57,7 +57,7 @@ def crawl(container, indent=0):
   if box.has_children:
    crawl(box.children, indent+1)
 
-print(crawl(iso))
+crawl(iso)
 
 # <FileTypeBox(type=ftyp,start=0,end=32,size=32,has_children=False)>
 # <FreeSpaceBox(type=free,start=32,end=40,size=8,has_children=False)>
