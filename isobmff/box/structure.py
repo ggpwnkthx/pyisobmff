@@ -160,9 +160,13 @@ class Box:
             )
         return None
 
-    def __getitem__(self, index: int):
+    def __getitem__(self, index: int | str):
         if self.has_children:
-            return self.children[index]
+            if isinstance(index, int):
+                return self.children[index]
+            elif isinstance(index, str):
+                items = [c for c in self.children if c.type == index]
+                return items if len(items) > 1 else items[0]
         raise IndexError("list index out of range")
 
     @functools.cached_property

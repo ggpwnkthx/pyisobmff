@@ -101,7 +101,46 @@ This package make working with remote files very convenient.
 
 ## Usage
 
+You can kind of treat `Scanner` and `Box` objects like lists and dictionaries by using square brackets to select child boxes. When an child is requested by its index number, it will checks its cache first and return the box at that postion. If not, it will scan thee file until that index is found. When an child is requested by a key string, the box will be fully scanned and a `list` of all boxes with a type equal to the requested key will be returned. If only one box is found, that one object will bee returned.
+
 ### Basic
+
+```python
+import isobmff
+
+fh = open("path/to/file.mp4", mode="rb")
+iso = isobmff.Scanner(fh)
+
+for track in iso["moov"]["trak"]:
+    print(track["mdia"]["hdlr"].handler_type)
+```
+
+### Crawler
+
+### Remote
+
+```python
+import isobmff
+import fsspec
+
+fh = fs.open(
+ "https://download.samplelib.com/mp4/sample-30s.mp4",
+ mode="rb",
+)
+iso = isobmff.Scanner(fh)
+
+for track in [
+ iso[-1][0][1]
+ iso[-1][0][2]
+]:
+ if track.type == "vide":
+  print((track.duration, track.width, track.height))
+ if track.type == "soun":
+  print((track.duration, track.volume))
+
+# (1, 30367, 1920.0, 1080.0)
+# (2, 30465, 1.0)
+```
 
 ```python
 import isobmff
@@ -130,31 +169,6 @@ crawl(iso)
 #    <MediaHeaderBox(type=mdhd,start=21623777,end=21638846,size=32,has_children=False,version=0)>
 #    <HandlerBox(type=hdlr,start=21623809,end=43262623,size=95,has_children=False,version=0)>
 #    ...
-```
-
-### Remote
-
-```python
-import isobmff
-import fsspec
-
-fh = fs.open(
- "https://download.samplelib.com/mp4/sample-30s.mp4",
- mode="rb",
-)
-iso = isobmff.Scanner(fh)
-
-for track in [
- iso[-1][0][1]
- iso[-1][0][2]
-]:
- if track.type == "vide":
-  print((track.duration, track.width, track.height))
- if track.type == "soun":
-  print((track.duration, track.volume))
-
-# (1, 30367, 1920.0, 1080.0)
-# (2, 30465, 1.0)
 ```
 
 ## Todo

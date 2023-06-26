@@ -34,6 +34,13 @@ class Scanner(CachedIterator):
             lambda this: Box(this.slice),
         )
 
+    def __getitem__(self, index: int | str):
+        if isinstance(index, int):
+            return super()[index]
+        elif isinstance(index, str):
+            items = [b for b in self if b.type == index]
+            return items if len(items) > 1 else items[0]
+
 
 __all__ = [
     "Scanner",
