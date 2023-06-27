@@ -6,6 +6,14 @@ The library is structured around the concept of "boxes", which are the basic bui
 
 The intention of this project is to provide a way to lazy-load only the ISOBMFF box data that you need, and to adaptively seek to and ignore data that you don't needed.
 
+## Installation
+
+As the library is not registered with pip, you can install it with the following pip command:
+
+```
+pip install git+https://github.com/ggpwnkthx/pyisobmff
+```
+
 ## Usage
 
 You can kind of treat `Scanner` and `Box` objects like lists and dictionaries by using square brackets to select child boxes. When an child is requested by its index number, it will checks its cache first and return the box at that postion. If not, it will scan thee file until that index is found. When an child is requested by a key string, the box will be fully scanned and a `list` of all boxes with a type equal to the requested key will be returned. If only one box is found, that one object will bee returned.
@@ -202,14 +210,6 @@ class CustomBox(isobmff.box.FullBox):
 isobmff.BOX_TYPES.update({
   "type": CustomBox
 })
-```
-
-## Installation
-
-As the library is not registered with pip, you can install it with the following pip command:
-
-```
-pip install git+https://github.com/ggpwnkthx/pyisobmff
 ```
 
 ### Optional Packages
