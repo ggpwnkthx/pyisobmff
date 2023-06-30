@@ -182,7 +182,7 @@ class CustomBox(isobmff.box.FullBox):
     elif self.version == 1:
       return self.slice.subslice(start, start + 4).unpack(">I")[0]
     # Otherwise, the custom_ID is a 64-bit unsigned integer.
-    return self.slice.subslice(start, start + 8).unpack(">I")[0]
+    return self.slice.subslice(start, start + 8).unpack(">Q")[0]
 
   @functools.cached_property
   def duration(self) -> int:
